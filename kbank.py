@@ -3,19 +3,6 @@
 Agent's Knowledge Bank.
 """
 
-##############################################################################
-#                               TODO                                         #
-##############################################################################
-#
-# [X] Move all constants to constants.py
-# [X] Create Death Exception Class
-# [X] Set surrounding squares to 0 if no wind or stench sense
-# [] Correct probabilities to include consideration for 1/15 chance of wumpus
-#    and gold (Remember that Wumpus is only a factor if a Stench sense is
-#    present).
-#
-##############################################################################
-
 from stimuli import Stimuli
 from environment import getEnv, getIndexes
 import constants as C
