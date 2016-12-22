@@ -1,3 +1,5 @@
+""" stimuli.py """
+
 from environment import getEnv, getIndexes
 import constants as C
 
@@ -9,6 +11,8 @@ senseMapping = SMap = {C.Pit: C.Wind,
 
 
 class Stimuli:
+    """ Holds state information relating to the sensory data that the agent
+        would perceive at each square in the Wumpus World environment (env) """
     def __init__(self, env):
         self.stimArr = [[set(), set(), set(), set()],
                         [set(), set(), set(), set()],

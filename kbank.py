@@ -1,3 +1,8 @@
+""" kbank.py
+
+Agent's Knowledge Bank.
+"""
+
 ##############################################################################
 #                               TODO                                         #
 ##############################################################################
@@ -21,6 +26,8 @@ import os
 
 
 class Death(Exception):
+    """ Exception class that will be raised in the event of the agent's
+        death. """
     def __init__(self, DeathType=None):
         if DeathType == C.Pit:
             output = "The Agent has fallen down into a pit!!! SHE'S DEAD!!!"
@@ -35,6 +42,12 @@ class Death(Exception):
 
 
 class KBank:
+    """ Agent's Knowledge Bank
+
+        Primary objective of this class is to establish accurate probabilities
+        of each square in the environment being either a pit or a wumpus by
+        using sensory data retrieved from each square that the agent has
+        visited """
     def __init__(self, stimArr):
         self.pProb = [[0., 0., 0., 0.],
                       [0., 0., 0., 0.],
@@ -70,18 +83,21 @@ class KBank:
                                              self.pProb[3])
 
     def setInitialProb(self):
+        """ Sets the initial probabilities of each square being a pit """
         for index in self.Indexes:
             x, y = index
             self.pKbase[x][y].append([5])
             self.pProb[x][y] = 0.2
 
     def markSafe(self, index):
+        """ Sets pitProb at index to 0 """
         x, y = index
         for P in self.pKbase[x][y]:
             P[0] -= 1
         self.pProb[x][y] = 0.0
 
     def calcProbs(self):
+        """ Uses percepts to calculate the pitProb of each square """
         for index in self.Indexes:
             x, y = index
             percepts = self.pKbase[x][y]
@@ -100,6 +116,9 @@ class KBank:
             self.pProb[x][y] = Prob
 
     def getDirections(self, index):
+        """ Returns a list of indexs made up of the following set:
+
+            {D: D is an index of a square adjacent to 'index'} """
         x, y = index
         directions = [(x + 1, y),  # right
                       (x - 1, y),  # left
@@ -115,6 +134,9 @@ class KBank:
         return directions
 
     def update(self, index):
+        """ Updates the pitProb of each square based on the percepts of the
+            current square and the knowledge of the percepts of previously
+            visited squares """
         if not (index in self.Indexes):
             return
         else:

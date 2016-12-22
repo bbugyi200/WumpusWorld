@@ -1,10 +1,17 @@
-from envsolver import Solvable
+""" tests.py
+
+Set of functions intended to run specific tests on this program """
+
+from algorithms import Solvable
 from environment import getEnv, getIndexes
 from sys import argv
 import timeit
 
 
 def TitlePrint(title):
+    """ Pretty-Prints a title
+
+        Intended to be used for demonstration purposes """
     titleLength = len(title)
     barLength = titleLength + 12
     fmtdTitle = '----- {0} -----'.format(title)
@@ -14,6 +21,7 @@ def TitlePrint(title):
 
 
 def TestSolvable(verbose=False, displayMax=10, loops=10000):
+    """ Tests the Solvable function """
     loops = int(loops)
     displayMax = int(displayMax)
 
@@ -52,6 +60,7 @@ def TestSolvable(verbose=False, displayMax=10, loops=10000):
 
 
 def TimeSolvable():
+    """ Times the Solvable function """
     stmts = '''
 env = getEnv()
 Indexes = getIndexes()
