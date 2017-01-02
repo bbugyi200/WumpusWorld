@@ -244,8 +244,4 @@ if __name__ == '__main__':
             TitlePrint('Percepts')
             for row in K.pKbase:
                 print(row)
-            # for D in K.getDirections(oldIndex):
-            #     x, y = D
-            #     fmt = 'Percepts for ({0},{1}) --> {2}'
-            #     print(fmt.format(x, y, K.pKbase[x][y]))
             print()
