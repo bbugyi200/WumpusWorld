@@ -53,7 +53,3 @@ The agent has five sensors, each of which gives a single bit of information (eac
 ### Illustration of a Typical Wumpus World
 
 ![Wumpus World Illustration](img/WumpusWorld.png)
-
-# Todo List
-
-- [ ] Correct pit probabilities to account for 1/15 chance of gold and wumpus probability (remember that the wumpus probability is only a factor if a *Stench* sense is present).
