@@ -6,6 +6,7 @@ from algorithms import Solvable
 from environment import getEnv, getIndexes
 from sys import argv
 import timeit
+import random
 
 
 def TitlePrint(title):
@@ -92,12 +93,49 @@ from environment import getEnv, getIndexes
           timeit.timeit(stmts, setup=setup, number=number) - extraTime)
 
 
-if __name__ == '__main__':
-    argsList = dict()
-    for i in range(2, 10):
-        if len(argv) - 1 < i: break
-        if argv[i][:2] == '--' and '=' in argv[i]:
-            key, value = argv[i][2:].split('=')
-            argsList.update({key: value})
+def PPSim(num, tests=100000, GP=0.2):
+    """ Simulates Pit Probabilities """
+    numOfSuccesses = 0
+    for x in range(tests):
+        num = int(num)
+        squares = [0] * num
+        pit_probability = [0, 0, 0, 0, 1]
+        Indexes = list(range(num))
 
-    globals()[argv[1]](**argsList)
+        selected = random.choice(Indexes)
+        squares[selected] = 1
+        Indexes.remove(selected)
+
+        for i in Indexes:
+            if random.choice(pit_probability):
+                squares[i] = 1
+
+        gold_probability = [0] * (int(1 / GP) - 1)
+        gold_probability[0] = 1
+
+        goldPlaced = False
+        for i in range(num - 1):
+            if not goldPlaced:
+                if random.choice(gold_probability):
+                    goldIndex = random.choice(Indexes)
+                    squares[goldIndex] = 2
+                    goldPlaced = True
+                    Indexes.remove(goldIndex)
+
+        if squares[0] == 1:
+            numOfSuccesses += 1
+
+    print('{0}%'.format(numOfSuccesses / tests * 100))
+
+
+if __name__ == '__main__':
+    # argsList = dict()
+    # for i in range(2, 10):
+    #     if len(argv) - 1 < i: break
+    #     if argv[i][:2] == '--' and '=' in argv[i]:
+    #         key, value = argv[i][2:].split('=')
+    #         argsList.update({key: value})
+
+    # globals()[argv[1]](**argsList)
+
+    PPSim(argv[1])

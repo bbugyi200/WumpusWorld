@@ -1,3 +1,5 @@
 ##### TODO LIST #####
 
-[] Correct pit probabilities to account for 1/15 chance of gold and wumpus probability (remember that the wumpus probability is only a factor if a *Stench* sense is present).
+[] Alter pProb to account for 1/15 probability of gold
+[] Implement wProb array
+[] Implement gProb array

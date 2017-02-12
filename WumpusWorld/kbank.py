@@ -46,6 +46,11 @@ class KBank:
                       [0., 0., 0., 0.],
                       [0., 0., 0., 0.]]
 
+        self.gProb = [[0., 0., 0., 0.],
+                      [0., 0., 0., 0.],
+                      [0., 0., 0., 0.],
+                      [0., 0., 0., 0.]]
+
         self.pKbase = [[list(), list(), list(), list()],
                        [list(), list(), list(), list()],
                        [list(), list(), list(), list()],
@@ -56,6 +61,15 @@ class KBank:
                        [list(), list(), list(), list()],
                        [list(), list(), list(), list()]]
 
+        self.gKbase = [[list(), list(), list(), list()],
+                       [list(), list(), list(), list()],
+                       [list(), list(), list(), list()],
+                       [list(), list(), list(), list()]]
+
+        self.KBanks = {'Pit': (self.pProb, self.pKbase),
+                       'Wumpus': (self.wProb, self.wKbase),
+                       'Gold': (self.gProb, self.gKbase)}
+
         self.listOfPercepts = []
         self.Indexes = getIndexes()
         self.setInitialProb()
@@ -63,44 +77,65 @@ class KBank:
 
         self.update(index=(0, 0))
 
-    def __str__(self):
-        return '{0}\n{1}\n{2}\n{3}\n'.format(self.pProb[0],
-                                             self.pProb[1],
-                                             self.pProb[2],
-                                             self.pProb[3])
-
     def setInitialProb(self):
         """ Sets the initial probabilities of each square being a pit """
+        self.listOfPercepts.append([16])
+        GPI = len(self.listOfPercepts) - 1
+        self.listOfPercepts.append([16])
+        WPI = len(self.listOfPercepts) - 1
         for index in self.Indexes:
             x, y = index
-            self.pKbase[x][y].append([5])
+            self.pKbase[x][y].append(['P'])
             self.pProb[x][y] = 0.2
 
-    def markSafe(self, index):
+            self.gKbase[x][y].append(self.listOfPercepts[GPI])
+            self.gProb[x][y] = 1 / 15
+
+            self.wKbase[x][y].append(self.listOfPercepts[WPI])
+            self.wProb[x][y] = 1 / 15
+
+    def markSafe(self, index, KBank):
         """ Sets pitProb at index to 0 """
         x, y = index
-        for P in self.pKbase[x][y]:
-            P[0] -= 1
-        self.pProb[x][y] = 0.0
+        ProbArray, Kbase = KBank
+        for P in Kbase[x][y]:
+            if P[0] != 'P':
+                P[0] -= 1
+                if P[0] < 0: P[0] = 0
+        Kbase[x][y] = [[0]]
+        ProbArray[x][y] = 0.0
 
     def calcProbs(self):
         """ Uses percepts to calculate the pitProb of each square """
-        for index in self.Indexes:
-            x, y = index
-            percepts = self.pKbase[x][y]
 
-            Prob = 0.0
-            if self.pProb[x][y]:
-                for P in percepts:
-                    P = P[0]
-                    try:
-                        P = 1 / P
-                    except:
-                        print('x:{0}\ny:{1}\nP:{2}'.format(x, y, P))
-                    Prob = 1 - ((1 - Prob) * (1 - P))
-                    Prob = math.ceil((Prob * 100)) / 100
+        def Inv(prob):
+            return (1 - prob)
 
-            self.pProb[x][y] = Prob
+        for KBank in (self.KBanks['Gold'], self.KBanks['Wumpus'], self.KBanks['Pit']):
+            ProbArray, KBase = KBank
+            for index in self.Indexes:
+                x, y = index
+                percepts = KBase[x][y]
+
+                Prob = 0.0
+                if ProbArray[x][y]:
+                    for P in percepts:
+                        P = P[0]
+
+                        PITP = False
+                        if P == 'P':
+                            P = 5
+                            PITP = True
+                        try:
+                            P = 1 / P
+                        except:
+                            print('x:{0}\ny:{1}\nP:{2}'.format(x, y, P))
+                        if PITP:
+                            P = P * Inv(self.wProb[x][y]) * Inv(self.gProb[x][y])
+                        Prob = Inv(Inv(Prob) * Inv(P))
+                        Prob = math.ceil((Prob * 100)) / 100
+
+                ProbArray[x][y] = Prob
 
     def getDirections(self, index):
         """ Returns a list of indexs made up of the following set:
@@ -137,7 +172,15 @@ class KBank:
         elif C.Wumpus in senses:
             raise Death(C.Wumpus)
 
-        self.markSafe(index)
+        self.markSafe(index, self.KBanks['Pit'])
+        self.markSafe(index, self.KBanks['Wumpus'])
+        if C.Gold in senses:
+            self.gProb[x][y] = 1.0
+            for I in self.Indexes:
+                self.markSafe(I, self.KBanks['Gold'])
+        else:
+            self.markSafe(index, self.KBanks['Gold'])
+        self.calcProbs()
 
         directions = self.getDirections(index)
 
@@ -158,22 +201,30 @@ class KBank:
         # If there is no wind sense in the current square, set probabilities
         # in adjacent squares to zero. (Use directions to avoid altering
         # squares that already have a zero probability)
-        if not (C.Wind in senses):
-            for D in directions:
-                self.markSafe(D)
-            self.calcProbs()
-
-        else:
+        if C.Wind in senses:
             # numOfPossibleLocations
             NoPL = len(directions)
 
-            if C.Wind in senses:
-                self.listOfPercepts.append([NoPL])
-                i = len(self.listOfPercepts) - 1
-                for D in directions:
-                    x, y = D
+            self.listOfPercepts.append([NoPL])
+            i = len(self.listOfPercepts) - 1
+            for D in directions:
+                x, y = D
 
-                    self.pKbase[x][y].append(self.listOfPercepts[i])
+                self.pKbase[x][y].append(self.listOfPercepts[i])
+
+        else:
+            for D in directions:
+                self.markSafe(D, self.KBanks['Pit'])
+            self.calcProbs()
+
+        # Wumpus Update
+        if C.Stench in senses:
+            for index in self.Indexes:
+                if index not in directions:
+                    self.markSafe(index, self.KBanks['Wumpus'])
+        else:
+            for D in directions:
+                self.markSafe(D, self.KBanks['Wumpus'])
 
         self.calcProbs()
 
@@ -213,9 +264,41 @@ if __name__ == '__main__':
                 else:
                     print(percept, end=' --- ')
         print()
+        for row in K.wKbase:
+            for percept in row:
+                count += 1
+                if count % 4 == 0:
+                    print(percept)
+                else:
+                    print(percept, end=' --- ')
+        print()
+
+        for row in K.gKbase:
+            for percept in row:
+                count += 1
+                if count % 4 == 0:
+                    print(percept)
+                else:
+                    print(percept, end=' --- ')
+        print()
 
         TitlePrint('Pit Probabilities')
-        print(K)
+        print('{0}\n{1}\n{2}\n{3}\n'.format(K.pProb[0],
+                                            K.pProb[1],
+                                            K.pProb[2],
+                                            K.pProb[3]))
+
+        TitlePrint('Wumpus Probabilities')
+        print('{0}\n{1}\n{2}\n{3}\n'.format(K.wProb[0],
+                                            K.wProb[1],
+                                            K.wProb[2],
+                                            K.wProb[3]))
+
+        TitlePrint('Gold Probabilities')
+        print('{0}\n{1}\n{2}\n{3}\n'.format(K.gProb[0],
+                                            K.gProb[1],
+                                            K.gProb[2],
+                                            K.gProb[3]))
 
         print('~~~ Input Options ~~~',
               '1. Enter Index (x y) to move agent.',
