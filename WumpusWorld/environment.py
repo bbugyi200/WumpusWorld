@@ -17,7 +17,7 @@ import numpy as np
 import random
 import constants as C
 
-# Initializes 4-by-4 numpy array
+
 # dtype=np.int sets the element type to integers
 env = np.zeros((4, 4), dtype=np.int)
 

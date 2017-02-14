@@ -7,6 +7,25 @@ from environment import getEnv, getIndexes
 from sys import argv
 import timeit
 import random
+import constants as C
+
+
+def makePretty(env):
+    """ Takes random environment and makes it easier on the eyes """
+    Env = env.astype(str)
+
+    for i in range(len(Env)):
+        for j in range(len(Env[i])):
+            if int(Env[i][j]) == C.Pit:
+                Env[i][j] = 'P'
+            elif int(Env[i][j]) == C.Wumpus:
+                Env[i][j] = 'W'
+            elif int(Env[i][j]) == C.Gold:
+                Env[i][j] = 'G'
+            elif int(Env[i][j]) == 1:
+                Env[i][j] = 'A'
+
+    return Env
 
 
 def TitlePrint(title):
@@ -93,39 +112,45 @@ from environment import getEnv, getIndexes
           timeit.timeit(stmts, setup=setup, number=number) - extraTime)
 
 
-def PPSim(num, tests=100000, GP=0.2):
+def PPSim(num, tests=100000, GP=0.2, IncludeGold=False):
     """ Simulates Pit Probabilities """
     numOfSuccesses = 0
+    total = tests
     for x in range(tests):
         num = int(num)
         squares = [0] * num
         pit_probability = [0, 0, 0, 0, 1]
         Indexes = list(range(num))
 
-        selected = random.choice(Indexes)
-        squares[selected] = 1
-        Indexes.remove(selected)
+        # selected = random.choice(Indexes)
+        # squares[selected] = 1
+        # Indexes.remove(selected)
 
         for i in Indexes:
             if random.choice(pit_probability):
                 squares[i] = 1
 
-        gold_probability = [0] * (int(1 / GP) - 1)
-        gold_probability[0] = 1
+        def setGold():
+            gold_probability = [0] * (int(1 / GP) - 1)
+            gold_probability[0] = 1
 
-        goldPlaced = False
-        for i in range(num - 1):
-            if not goldPlaced:
-                if random.choice(gold_probability):
-                    goldIndex = random.choice(Indexes)
-                    squares[goldIndex] = 2
-                    goldPlaced = True
-                    Indexes.remove(goldIndex)
+            goldPlaced = False
+            for i in range(num - 1):
+                if not goldPlaced:
+                    if random.choice(gold_probability):
+                        goldIndex = random.choice(Indexes)
+                        squares[goldIndex] = 2
+                        goldPlaced = True
+                        Indexes.remove(goldIndex)
 
+        if IncludeGold: setGold()
+
+        if squares[0] == 0 and squares[1] == 0:
+            total -= 1
         if squares[0] == 1:
             numOfSuccesses += 1
 
-    print('{0}%'.format(numOfSuccesses / tests * 100))
+    print('{0}%'.format(numOfSuccesses / total * 100))
 
 
 if __name__ == '__main__':

@@ -6,7 +6,7 @@ Agent's Knowledge Bank.
 from stimuli import Stimuli
 from environment import getEnv, getIndexes
 import constants as C
-from tests import TitlePrint
+from tests import TitlePrint, makePretty
 import numpy
 import math
 import os
@@ -71,6 +71,7 @@ class KBank:
                        'Gold': (self.gProb, self.gKbase)}
 
         self.listOfPercepts = []
+        self.KnownWumpus = False
         self.Indexes = getIndexes()
         self.setInitialProb()
         self.stimArr = stimArr
@@ -136,6 +137,11 @@ class KBank:
                         Prob = math.ceil((Prob * 100)) / 100
 
                 ProbArray[x][y] = Prob
+                if Prob == 1.0:
+                    if KBank != self.KBanks['Gold']:
+                        self.gProb[x][y] = 0.0
+                    if KBank == self.KBanks['Wumpus']:
+                        self.KnownWumpus = True
 
     def getDirections(self, index):
         """ Returns a list of indexs made up of the following set:
@@ -171,29 +177,28 @@ class KBank:
             raise Death(C.Pit)
         elif C.Wumpus in senses:
             raise Death(C.Wumpus)
-
-        self.markSafe(index, self.KBanks['Pit'])
-        self.markSafe(index, self.KBanks['Wumpus'])
-        if C.Gold in senses:
+        elif C.Gold in senses:
             self.gProb[x][y] = 1.0
             for I in self.Indexes:
                 self.markSafe(I, self.KBanks['Gold'])
         else:
             self.markSafe(index, self.KBanks['Gold'])
+
+        self.markSafe(index, self.KBanks['Pit'])
+        self.markSafe(index, self.KBanks['Wumpus'])
+
         self.calcProbs()
 
         directions = self.getDirections(index)
 
         # Check for adjacent square with probability of pit equal to 1.0.
-        #
-        # If found, end the function. Pit is known to be in adjacent square,
-        # so C.Wind is not new data.
+        KnownPit = False
         for D in directions:
             x, y = D
             try:
                 if self.pProb[x][y] == 1.0:
                     self.calcProbs()
-                    return
+                    KnownPit = True
             except IndexError:
                 fmt = 'IndexError triggerred using (x={0}, y={1})'
                 print(fmt.format(x, y))
@@ -201,24 +206,28 @@ class KBank:
         # If there is no wind sense in the current square, set probabilities
         # in adjacent squares to zero. (Use directions to avoid altering
         # squares that already have a zero probability)
-        if C.Wind in senses:
-            # numOfPossibleLocations
-            NoPL = len(directions)
+        if not KnownPit:
+            if C.Wind in senses:
+                # numOfPossibleLocations
+                NoPL = len(directions)
 
-            self.listOfPercepts.append([NoPL])
-            i = len(self.listOfPercepts) - 1
-            for D in directions:
-                x, y = D
+                self.listOfPercepts.append([NoPL])
+                i = len(self.listOfPercepts) - 1
+                for D in directions:
+                    x, y = D
 
-                self.pKbase[x][y].append(self.listOfPercepts[i])
+                    self.pKbase[x][y].append(self.listOfPercepts[i])
 
-        else:
-            for D in directions:
-                self.markSafe(D, self.KBanks['Pit'])
-            self.calcProbs()
+            else:
+                for D in directions:
+                    self.markSafe(D, self.KBanks['Pit'])
+                self.calcProbs()
 
         # Wumpus Update
-        if C.Stench in senses:
+        if self.KnownWumpus:
+            print("KnownWumpus!!!")
+            pass
+        elif C.Stench in senses:
             for index in self.Indexes:
                 if index not in directions:
                     self.markSafe(index, self.KBanks['Wumpus'])
@@ -243,6 +252,7 @@ if __name__ == '__main__':
         return env
 
     env = getEnv()
+    Env = makePretty(env)
 
     stimArr = Stimuli(env).stimArr
     K = KBank(stimArr)
@@ -250,10 +260,6 @@ if __name__ == '__main__':
     oldIndex = (0, 0)
     x, y = (0, 0)
     while(True):
-        print('Position of Agent: ({0},{1})'.format(x, y), end='\n\n')
-        TitlePrint('Environment')
-        print(env, end='\n\n')
-
         TitlePrint('Percepts')
         count = 0
         for row in K.pKbase:
@@ -300,26 +306,37 @@ if __name__ == '__main__':
                                             K.gProb[2],
                                             K.gProb[3]))
 
-        print('~~~ Input Options ~~~',
-              '1. Enter Index (x y) to move agent.',
-              '2. Enter N to get a new random (non-modified) environment.',
-              '3. Enter M to get a new random (modified) environment.',
-              sep='\n',
-              end='\n\n')
+        TitlePrint('Environment')
+        print(Env, end='\n\n')
+
+        print('Position of Agent: ({0},{1})'.format(x, y), end='\n\n')
 
         userInput = input('>>> ')
         os.system('clear')
 
+        ##### Instructions #####
+        #
+        # print('~~~ Input Options ~~~',
+        #       '1. Enter Index (x y) to move agent.',
+        #       '2. Enter N to get a new random (non-modified) environment.',
+        #       '3. Enter M to get a new random (modified) environment.',
+        #       sep='\n',
+        #       end='\n\n')
+
         if len(userInput.split()) == 2:
+            Env[oldIndex] = 'X'
             x, y = userInput.split()
             x = int(x); y = int(y)
+            Env[x][y] = 'A'
             oldIndex = (x, y)
             K.update(index=(x, y))
         elif userInput in 'MN':
             if userInput == 'M':
                 env = getModifiedEnv()
+                Env = makePretty(env)
             elif userInput == 'N':
                 env = getEnv()
+                Env = makePretty(env)
             x, y = (0, 0)
             stimArr = Stimuli(env).stimArr
             K = KBank(stimArr)
