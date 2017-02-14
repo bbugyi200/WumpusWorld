@@ -110,7 +110,10 @@ class KBank:
         """ Uses percepts to calculate the pitProb of each square """
 
         def Inv(prob):
-            return (1 - prob)
+            if (1 - prob) >= 0:
+                return (1 - prob)
+            else:
+                return 0.0
 
         for KBank in (self.KBanks['Gold'], self.KBanks['Wumpus'], self.KBanks['Pit']):
             ProbArray, KBase = KBank
@@ -132,14 +135,14 @@ class KBank:
                         except:
                             print('x:{0}\ny:{1}\nP:{2}'.format(x, y, P))
                         if PITP:
-                            P = P * Inv(self.wProb[x][y]) * Inv(self.gProb[x][y])
-                        Prob = Inv(Inv(Prob) * Inv(P))
+                            P = P * Inv(Prob + self.wProb[x][y] + self.gProb[x][y])
+                        Prob = Prob + P
                         Prob = math.ceil((Prob * 100)) / 100
 
                 ProbArray[x][y] = Prob
                 if Prob == 1.0:
                     if KBank != self.KBanks['Gold']:
-                        self.gProb[x][y] = 0.0
+                        self.markSafe((x, y), self.KBanks['Gold'])
                     if KBank == self.KBanks['Wumpus']:
                         self.KnownWumpus = True
 
@@ -216,7 +219,7 @@ class KBank:
                 for D in directions:
                     x, y = D
 
-                    self.pKbase[x][y].append(self.listOfPercepts[i])
+                    self.pKbase[x][y] = [self.listOfPercepts[i]] + self.pKbase[x][y]
 
             else:
                 for D in directions:
@@ -225,7 +228,6 @@ class KBank:
 
         # Wumpus Update
         if self.KnownWumpus:
-            print("KnownWumpus!!!")
             pass
         elif C.Stench in senses:
             for index in self.Indexes:
@@ -288,23 +290,24 @@ if __name__ == '__main__':
                     print(percept, end=' --- ')
         print()
 
-        TitlePrint('Pit Probabilities')
-        print('{0}\n{1}\n{2}\n{3}\n'.format(K.pProb[0],
-                                            K.pProb[1],
-                                            K.pProb[2],
-                                            K.pProb[3]))
-
-        TitlePrint('Wumpus Probabilities')
-        print('{0}\n{1}\n{2}\n{3}\n'.format(K.wProb[0],
-                                            K.wProb[1],
-                                            K.wProb[2],
-                                            K.wProb[3]))
-
-        TitlePrint('Gold Probabilities')
-        print('{0}\n{1}\n{2}\n{3}\n'.format(K.gProb[0],
-                                            K.gProb[1],
-                                            K.gProb[2],
-                                            K.gProb[3]))
+        TitlePrint('Probabilities')
+        T = '====== {0} ======'
+        fmt = '{12:<30}{13:<30}{14}\n{0:<30}{4:<30}{8}\n{1:<30}{5:<30}{9}\n{2:<30}{6:<30}{10}\n{3:<30}{7:<30}{11}\n'
+        print(fmt.format(str(K.pProb[0]),
+                         str(K.pProb[1]),
+                         str(K.pProb[2]),
+                         str(K.pProb[3]),
+                         str(K.wProb[0]),
+                         str(K.wProb[1]),
+                         str(K.wProb[2]),
+                         str(K.wProb[3]),
+                         str(K.gProb[0]),
+                         str(K.gProb[1]),
+                         str(K.gProb[2]),
+                         str(K.gProb[3]),
+                         T.format('Pit'),
+                         T.format('Wumpus'),
+                         T.format('Gold')))
 
         TitlePrint('Environment')
         print(Env, end='\n\n')

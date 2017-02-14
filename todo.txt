@@ -1,5 +1,8 @@
 ##### TODO LIST #####
 
-[] Alter pProb to account for 1/15 probability of gold
-[] Implement wProb array
-[] Implement gProb array
+[X] Alter pProb to account for 1/15 probability of gold
+[X] Implement wProb array
+[X] Implement gProb array
+[] Implement class that handles dependent probabilities. List sharing method has too much overhead.
+[] Refactor 'calcProbs' function
+[] gProb should change when Wumpus or Pit is known to exist in certain set of squares
