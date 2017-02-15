@@ -6,7 +6,7 @@ Agent's Knowledge Bank.
 from stimuli import Stimuli
 from environment import getEnv, getIndexes
 import constants as C
-from tests import TitlePrint, makePretty
+from tests.pretty import TitlePrint, makePretty
 import numpy
 import math
 import os
@@ -136,7 +136,9 @@ class KBank:
                             print('x:{0}\ny:{1}\nP:{2}'.format(x, y, P))
                         if PITP:
                             P = P * Inv(Prob + self.wProb[x][y] + self.gProb[x][y])
-                        Prob = Prob + P
+                            Prob = Prob + P
+                        else:
+                            Prob = Inv(Inv(Prob) * Inv(P))
                         Prob = math.ceil((Prob * 100)) / 100
 
                 ProbArray[x][y] = Prob
