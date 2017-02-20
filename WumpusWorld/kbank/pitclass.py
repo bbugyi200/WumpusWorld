@@ -26,3 +26,6 @@ class bitStrings:
 
     def get(self):
         return self.strings
+
+if __name__ == '__main__':
+    PC = PitClass

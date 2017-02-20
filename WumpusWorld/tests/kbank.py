@@ -1,7 +1,7 @@
 from ..environment import getEnv
 from .pretty import TitlePrint, makePretty
 from ..stimuli import Stimuli
-from ..kbank import KBank
+from ..kbank.kbank import KBank
 from .sims import getTestEnv
 import os
 
@@ -15,49 +15,21 @@ K = KBank(stimArr)
 oldIndex = (0, 0)
 x, y = (0, 0)
 while(True):
-    TitlePrint('Percepts')
-    count = 0
-    for row in K.pKbase:
-        for percept in row:
-            count += 1
-            if count % 4 == 0:
-                print(percept)
-            else:
-                print(percept, end=' --- ')
-    print()
-    for row in K.wKbase:
-        for percept in row:
-            count += 1
-            if count % 4 == 0:
-                print(percept)
-            else:
-                print(percept, end=' --- ')
-    print()
-
-    for row in K.gKbase:
-        for percept in row:
-            count += 1
-            if count % 4 == 0:
-                print(percept)
-            else:
-                print(percept, end=' --- ')
-    print()
-
     TitlePrint('Probabilities')
     T = '====== {0} ======'
     fmt = '{12:<30}{13:<30}{14}\n{0:<30}{4:<30}{8}\n{1:<30}{5:<30}{9}\n{2:<30}{6:<30}{10}\n{3:<30}{7:<30}{11}\n'
-    print(fmt.format(str(K.pProb[0]),
-                     str(K.pProb[1]),
-                     str(K.pProb[2]),
-                     str(K.pProb[3]),
-                     str(K.wProb[0]),
-                     str(K.wProb[1]),
-                     str(K.wProb[2]),
-                     str(K.wProb[3]),
-                     str(K.gProb[0]),
-                     str(K.gProb[1]),
-                     str(K.gProb[2]),
-                     str(K.gProb[3]),
+    print(fmt.format(str(K.PBank.Probs[0]),
+                     str(K.PBank.Probs[1]),
+                     str(K.PBank.Probs[2]),
+                     str(K.PBank.Probs[3]),
+                     str(K.WBank.Probs[0]),
+                     str(K.WBank.Probs[1]),
+                     str(K.WBank.Probs[2]),
+                     str(K.WBank.Probs[3]),
+                     str(K.GBank.Probs[0]),
+                     str(K.GBank.Probs[1]),
+                     str(K.GBank.Probs[2]),
+                     str(K.GBank.Probs[3]),
                      T.format('Pit'),
                      T.format('Wumpus'),
                      T.format('Gold')))
@@ -70,14 +42,15 @@ while(True):
     userInput = input('>>> ')
     os.system('clear')
 
-    ##### Instructions #####
-    #
-    # print('~~~ Input Options ~~~',
-    #       '1. Enter Index (x y) to move agent.',
-    #       '2. Enter N to get a new random (non-modified) environment.',
-    #       '3. Enter M to get a new random (modified) environment.',
-    #       sep='\n',
-    #       end='\n\n')
+    """ Instructions
+
+     print('~~~ Input Options ~~~',
+           '1. Enter Index (x y) to move agent.',
+           '2. Enter N to get a new random (non-modified) environment.',
+           '3. Enter M to get a new random (modified) environment.',
+           sep='\n',
+           end='\n\n')
+    """
 
     oldIndex = (x, y)
     if len(userInput.split()) == 2:
@@ -85,7 +58,8 @@ while(True):
         x, y = userInput.split()
         x = int(x); y = int(y)
         Env[x][y] = 'A'
-        K.update(index=(x, y))
+        for Bank in K.BankList:
+            Bank.update(index=(x, y))
     elif userInput in 'MN':
         if userInput == 'M':
             env = getTestEnv()

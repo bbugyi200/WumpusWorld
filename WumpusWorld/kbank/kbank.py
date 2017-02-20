@@ -5,10 +5,12 @@ Agent's Knowledge Bank.
 
 from ..environment import getIndexes
 from .. import constants as C
+from .death import Death
 import math
+import abc
 
 
-class KBank:
+class BaseBank:
     """ Agent's Knowledge Bank
 
         Primary objective of this class is to establish accurate probabilities
@@ -16,137 +18,30 @@ class KBank:
         using sensory data retrieved from each square that the agent has
         visited """
     def __init__(self, stimArr):
-        self.pProb = [[0., 0., 0., 0.],
+        self.Probs = [[0., 0., 0., 0.],
                       [0., 0., 0., 0.],
                       [0., 0., 0., 0.],
                       [0., 0., 0., 0.]]
 
-        self.wProb = [[0., 0., 0., 0.],
-                      [0., 0., 0., 0.],
-                      [0., 0., 0., 0.],
-                      [0., 0., 0., 0.]]
-
-        self.gProb = [[0., 0., 0., 0.],
-                      [0., 0., 0., 0.],
-                      [0., 0., 0., 0.],
-                      [0., 0., 0., 0.]]
-
-        self.pKbase = [[list(), list(), list(), list()],
-                       [list(), list(), list(), list()],
-                       [list(), list(), list(), list()],
-                       [list(), list(), list(), list()]]
-
-        self.wKbase = [[list(), list(), list(), list()],
-                       [list(), list(), list(), list()],
-                       [list(), list(), list(), list()],
-                       [list(), list(), list(), list()]]
-
-        self.gKbase = [[list(), list(), list(), list()],
-                       [list(), list(), list(), list()],
-                       [list(), list(), list(), list()],
-                       [list(), list(), list(), list()]]
-
-        self.KBanks = {'Pit': (self.pProb, self.pKbase),
-                       'Wumpus': (self.wProb, self.wKbase),
-                       'Gold': (self.gProb, self.gKbase)}
-
-        self.listOfPercepts = []
-        self.KnownWumpus = False
+        __metaclass__ = abc.ABCMeta
         self.Indexes = getIndexes()
-        self.setInitialProb()
         self.stimArr = stimArr
+        self.Known = False
 
-        self.update(index=(0, 0))
-
-    def Partition(self, parity='even'):
-        if parity == 'even':
-            parity = True
-        elif parity == 'odd':
-            parity = False
-        else:
-            raise Exception('Parity must be Even or Odd!')
-
-        partition = set()
-        for index in self.Indexes:
-            x, y = index
-            even = True
-            if (x + y) % 2:
-                even = False
-
-            if not (parity ^ even):  # XNOR
-                partition.add(index)
-
-        return partition
-
-    def setInitialProb(self):
-        """ Sets the initial probabilities of each square being a pit """
-        self.listOfPercepts.append([16])
-        GPI = len(self.listOfPercepts) - 1
-        self.listOfPercepts.append([16])
-        WPI = len(self.listOfPercepts) - 1
-        for index in self.Indexes:
-            x, y = index
-            self.pKbase[x][y].append(['P'])
-            self.pProb[x][y] = 0.2
-
-            self.gKbase[x][y].append(self.listOfPercepts[GPI])
-            self.gProb[x][y] = 1 / 15
-
-            self.wKbase[x][y].append(self.listOfPercepts[WPI])
-            self.wProb[x][y] = 1 / 15
-
-    def markSafe(self, index, KBank):
+    def markSafe(self, index):
         """ Sets pitProb at index to 0 """
         x, y = index
-        ProbArray, Kbase = KBank
-        for P in Kbase[x][y]:
-            if P[0] != 'P':
-                P[0] -= 1
-                if P[0] < 0: P[0] = 0
-        Kbase[x][y] = [[0]]
-        ProbArray[x][y] = 0.0
+        self.Probs[x][y] = 0.0
 
+    def Inv(self, prob):
+        if (1 - prob) >= 0:
+            return (1 - prob)
+        else:
+            return 0.0
+
+    @abc.abstractmethod
     def calcProbs(self):
-        """ Uses percepts to calculate the pitProb of each square """
-
-        def Inv(prob):
-            if (1 - prob) >= 0:
-                return (1 - prob)
-            else:
-                return 0.0
-
-        for KBank in (self.KBanks['Gold'], self.KBanks['Wumpus'], self.KBanks['Pit']):
-            ProbArray, KBase = KBank
-            for index in self.Indexes:
-                x, y = index
-                percepts = KBase[x][y]
-
-                Prob = 0.0
-                if ProbArray[x][y]:
-                    for P in percepts:
-                        P = P[0]
-
-                        PITP = False
-                        if P == 'P':
-                            P = 5
-                            PITP = True
-                        try:
-                            P = 1 / P
-                        except:
-                            print('x:{0}\ny:{1}\nP:{2}'.format(x, y, P))
-                        if PITP:
-                            P = P * Inv(Prob + self.wProb[x][y] + self.gProb[x][y])
-                            Prob = Prob + P
-                        else:
-                            Prob = Inv(Inv(Prob) * Inv(P))
-                        Prob = math.ceil((Prob * 100)) / 100
-
-                ProbArray[x][y] = Prob
-                if Prob == 1.0:
-                    if KBank != self.KBanks['Gold']:
-                        self.markSafe((x, y), self.KBanks['Gold'])
-                    if KBank == self.KBanks['Wumpus']:
-                        self.KnownWumpus = True
+        pass
 
     def getDirections(self, index):
         """ Returns a list of indexs made up of the following set:
@@ -161,82 +56,155 @@ class KBank:
         dummyDirs = directions[:]
         for D in dummyDirs:
             x, y = D
-            if (D not in self.Indexes) or (self.pProb[x][y] == 0.0):
-                directions.remove(D)
+            if (D not in self.Indexes) or \
+               (self.Probs[x][y] == 0.0) or \
+               (self.Probs[x][y] == 1.0):
+                    directions.remove(D)
 
         return directions
 
     def update(self, index):
-        """ Updates the pitProb of each square based on the percepts of the
-            current square and the knowledge of the percepts of previously
-            visited squares """
         if not (index in self.Indexes):
             return
+
+        self.Indexes.remove(index)
+
+        x, y = index
+
+        self.calcProbs()
+
+
+class Uniform(BaseBank):
+    def __init__(self, stimArr):
+        BaseBank.__init__(self, stimArr)
+        self.Kbase = [[list(), list(), list(), list()],
+                      [list(), list(), list(), list()],
+                      [list(), list(), list(), list()],
+                      [list(), list(), list(), list()]]
+
+        self.listOfPercepts = []
+
+        self.uniformDistribution()
+        self.update((0, 0))
+
+    def markSafe(self, index):
+        BaseBank.markSafe(self, index)
+        x, y = index
+        self.Kbase[x][y][0][0] -= 1
+        self.Kbase[x][y] = [[0]]
+
+    def uniformDistribution(self):
+        self.listOfPercepts.append([16])
+        PerceptIndex = len(self.listOfPercepts) - 1
+        for index in self.Indexes:
+            x, y = index
+            self.Kbase[x][y].append(self.listOfPercepts[PerceptIndex])
+            self.Probs[x][y] = math.ceil(1 / 15 * 1000) / 1000
+
+    def calcProbs(self):
+        """ Uses percepts to calculate the pitProb of each square """
+        for index in self.Indexes:
+            x, y = index
+            percepts = self.Kbase[x][y]
+
+            Prob = 0.0
+            if self.Probs[x][y]:
+                P = percepts[0][0]
+
+                try:
+                    Prob = 1 / P
+                except:
+                    print('x:{0}\ny:{1}\nP:{2}'.format(x, y, P))
+                Prob = math.ceil((Prob * 1000)) / 1000
+
+                self.Probs[x][y] = Prob
+                if Prob == 1.0:
+                    self.Known = True
+
+
+class WBank(Uniform):
+    def __init__(self, stimArr):
+        Uniform.__init__(self, stimArr)
+
+    def update(self, index):
+        Uniform.update(self, index)
+
+        x, y = index
+        senses = self.stimArr[x][y]
+        directions = self.getDirections(index)
+
+        if C.Stench in senses:
+            for index in self.Indexes:
+                x, y = index
+                if (index not in directions) and (self.Probs[x][y] != 1.0):
+                    self.markSafe(index)
         else:
-            self.Indexes.remove(index)
+            for D in directions:
+                self.markSafe(D)
+
+        if C.Wumpus in senses:
+            raise Death(C.Wumpus)
+        else:
+            self.markSafe(index)
+
+        self.calcProbs()
+
+
+class GBank(Uniform):
+    def update(self, index):
+        Uniform.update(self, index)
+
+        x, y = index
+        senses = self.stimArr[x][y]
+
+        if C.Gold in senses:
+            self.Probs[x][y] = 1.0
+            for I in self.Indexes:
+                self.markSafe(I)
+        else:
+            self.markSafe(index)
+
+
+class PBank(BaseBank):
+    def __init__(self, stimArr):
+        BaseBank.__init__(self, stimArr)
+
+    def update(self, index):
+        BaseBank.update(self, index)
 
         x, y = index
         senses = self.stimArr[x][y]
 
         if C.Pit in senses:
             raise Death(C.Pit)
-        elif C.Wumpus in senses:
-            raise Death(C.Wumpus)
-        elif C.Gold in senses:
-            self.gProb[x][y] = 1.0
-            for I in self.Indexes:
-                self.markSafe(I, self.KBanks['Gold'])
         else:
-            self.markSafe(index, self.KBanks['Gold'])
+            self.markSafe(index)
 
-        self.markSafe(index, self.KBanks['Pit'])
-        self.markSafe(index, self.KBanks['Wumpus'])
+    # def Partition(self, parity='even'):
+    #     if parity == 'even':
+    #         parity = True
+    #     elif parity == 'odd':
+    #         parity = False
+    #     else:
+    #         raise Exception('Parity must be Even or Odd!')
 
-        self.calcProbs()
+    #     partition = set()
+    #     for index in self.Indexes:
+    #         x, y = index
+    #         even = True
+    #         if (x + y) % 2:
+    #             even = False
 
-        directions = self.getDirections(index)
+    #         if not (parity ^ even):  # XNOR
+    #             partition.add(index)
 
-        # Check for adjacent square with probability of pit equal to 1.0.
-        KnownPit = False
-        for D in directions:
-            x, y = D
-            try:
-                if self.pProb[x][y] == 1.0:
-                    self.calcProbs()
-                    KnownPit = True
-            except IndexError:
-                fmt = 'IndexError triggerred using (x={0}, y={1})'
-                print(fmt.format(x, y))
+    #     return partition
 
-        # If there is no wind sense in the current square, set probabilities
-        # in adjacent squares to zero. (Use directions to avoid altering
-        # squares that already have a zero probability)
-        if not KnownPit:
-            if C.Wind in senses:
-                # numOfPossibleLocations
-                NoPL = len(directions)
 
-                self.listOfPercepts.append([NoPL])
-                i = len(self.listOfPercepts) - 1
-                for D in directions:
-                    x, y = D
+class KBank:
+    def __init__(self, stimArr):
+        self.PBank = PBank(stimArr)
+        self.WBank = WBank(stimArr)
+        self.GBank = GBank(stimArr)
 
-                    self.pKbase[x][y] = [self.listOfPercepts[i]] + self.pKbase[x][y]
-
-            else:
-                for D in directions:
-                    self.markSafe(D, self.KBanks['Pit'])
-                self.calcProbs()
-
-        # Wumpus Update
-        if self.KnownWumpus:
-            pass
-        elif C.Stench in senses:
-            for index in self.Indexes:
-                if index not in directions:
-                    self.markSafe(index, self.KBanks['Wumpus'])
-        else:
-            for D in directions:
-                self.markSafe(D, self.KBanks['Wumpus'])
-
-        self.calcProbs()
+        self.BankList = [self.PBank, self.WBank, self.GBank]
