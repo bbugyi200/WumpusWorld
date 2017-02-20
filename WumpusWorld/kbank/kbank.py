@@ -71,6 +71,14 @@ class BaseBank:
 
         x, y = index
 
+        senses = self.stimArr[x][y]
+        if C.Wumpus in senses:
+            raise Death(C.Wumpus)
+        if C.Pit in senses:
+            raise Death(C.Pit)
+        else:
+            self.markSafe(index)
+
         self.calcProbs()
 
 
@@ -142,11 +150,6 @@ class WBank(Uniform):
             for D in directions:
                 self.markSafe(D)
 
-        if C.Wumpus in senses:
-            raise Death(C.Wumpus)
-        else:
-            self.markSafe(index)
-
         self.calcProbs()
 
 
@@ -172,33 +175,25 @@ class PBank(BaseBank):
     def update(self, index):
         BaseBank.update(self, index)
 
-        x, y = index
-        senses = self.stimArr[x][y]
-
-        if C.Pit in senses:
-            raise Death(C.Pit)
+    def Partition(self, parity='even'):
+        if parity == 'even':
+            parity = True
+        elif parity == 'odd':
+            parity = False
         else:
-            self.markSafe(index)
+            raise Exception('Parity must be Even or Odd!')
 
-    # def Partition(self, parity='even'):
-    #     if parity == 'even':
-    #         parity = True
-    #     elif parity == 'odd':
-    #         parity = False
-    #     else:
-    #         raise Exception('Parity must be Even or Odd!')
+        partition = set()
+        for index in self.Indexes:
+            x, y = index
+            even = True
+            if (x + y) % 2:
+                even = False
 
-    #     partition = set()
-    #     for index in self.Indexes:
-    #         x, y = index
-    #         even = True
-    #         if (x + y) % 2:
-    #             even = False
+            if not (parity ^ even):  # XNOR
+                partition.add(index)
 
-    #         if not (parity ^ even):  # XNOR
-    #             partition.add(index)
-
-    #     return partition
+        return partition
 
 
 class KBank:
