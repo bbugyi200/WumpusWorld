@@ -1,7 +1,7 @@
 """ stimuli.py """
 
-from environment import getEnv, getIndexes
-import constants as C
+from .environment import getEnv, getIndexes
+from . import constants as C
 
 env = getEnv()
 Indexes = getIndexes()

@@ -2,8 +2,8 @@
 
 Set of functions intended to run specific tests on this program """
 
-from algorithms import Solvable
-from environment import getEnv, getIndexes
+from ..algorithms import Solvable
+from ..environment import getEnv, getIndexes
 from sys import argv
 import timeit
 
@@ -81,11 +81,11 @@ from environment import getEnv, getIndexes
 
 
 if __name__ == '__main__':
-    # argsList = dict()
-    # for i in range(2, 10):
-    #     if len(argv) - 1 < i: break
-    #     if argv[i][:2] == '--' and '=' in argv[i]:
-    #         key, value = argv[i][2:].split('=')
-    #         argsList.update({key: value})
+    argsList = dict()
+    for i in range(2, 10):
+        if len(argv) - 1 < i: break
+        if argv[i][:2] == '--' and '=' in argv[i]:
+            key, value = argv[i][2:].split('=')
+            argsList.update({key: value})
 
-    # globals()[argv[1]](**argsList)
+    globals()[argv[1]](**argsList)

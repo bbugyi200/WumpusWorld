@@ -1,4 +1,31 @@
 import random
+import numpy as np
+from ..environment import getEnv
+from .. import constants as C
+
+
+def getTestEnv():
+    M1 = np.zeros((4, 4), dtype=int)
+    A = C.Agent
+    P = C.Pit
+    M1[0] = [A, 0, 0, P]
+    M1[1] = [0, 0, P, 0]
+    M1[2] = [0, P, 0, 0]
+    M1[3] = [P, 0, 0, 0]
+
+    return M1
+
+
+def testRandomEnvs(loops=100000):
+    totalPits = 0
+    for i in range(loops):
+        env = getEnv()
+        unique, counts = np.unique(env, return_counts=True)
+        try:
+            totalPits += dict(zip(unique, counts))[C.Pit]
+        except KeyError:
+            pass
+    return totalPits / loops
 
 
 def PPSim(num, tests=100000, GP=0.2, IncludeGold=False):
@@ -11,9 +38,9 @@ def PPSim(num, tests=100000, GP=0.2, IncludeGold=False):
         pit_probability = [0, 0, 0, 0, 1]
         Indexes = list(range(num))
 
-        # selected = random.choice(Indexes)
-        # squares[selected] = 1
-        # Indexes.remove(selected)
+        selected = random.choice(Indexes)
+        squares[selected] = 1
+        Indexes.remove(selected)
 
         for i in Indexes:
             if random.choice(pit_probability):
@@ -40,3 +67,6 @@ def PPSim(num, tests=100000, GP=0.2, IncludeGold=False):
             numOfSuccesses += 1
 
     print('{0}%'.format(numOfSuccesses / total * 100))
+
+counts = testRandomEnvs()
+print(counts)

@@ -1,4 +1,4 @@
-import constants as C
+from .. import constants as C
 
 
 def makePretty(env):

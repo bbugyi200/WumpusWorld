@@ -15,7 +15,7 @@ in their text, "Artificial Intelligence: A Modern Apprach":
 
 import numpy as np
 import random
-import constants as C
+from . import constants as C
 
 
 # dtype=np.int sets the element type to integers
