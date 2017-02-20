@@ -3,52 +3,9 @@
 Agent's Knowledge Bank.
 """
 
-from .environment import getIndexes
-from . import constants as C
+from ..environment import getIndexes
+from .. import constants as C
 import math
-import itertools
-from collections import namedtuple
-
-
-class Death(Exception):
-    """ Exception class that will be raised in the event of the agent's
-        death. """
-    def __init__(self, DeathType=None):
-        if DeathType == C.Pit:
-            output = "The Agent has fallen down into a pit!!! SHE'S DEAD!!!"
-        elif DeathType == C.Wumpus:
-            output = "The Agent entered a room with the Wumpus!!! SHE HAS " \
-                "BEEN EATEN!!!"
-        else:
-            output = "The Agent has went into a room with either a pit or a " \
-                "wumpus!!! SHE IS DEAD!!!"
-
-        Exception.__init__(self, output)
-
-
-class bitStrings:
-    def __init__(self, partition):
-        self.length = len(partition)
-
-        self.IMap = dict()
-        for i, index in enumerate(partition):
-            self.IMap[index] = i
-
-        self.strings = [''.join(seq) for seq in itertools.product("01", repeat=self.length)]
-
-    def get(self):
-        return self.strings
-
-
-class PitClass:
-    def __init__(self, partition):
-
-        BS = bitStrings(partition)
-        bStrings = BS.get()
-
-        Outcome = namedtuple('outcome', 'bitstr prob')
-        self.outcomes = []
-
 
 
 class KBank:
