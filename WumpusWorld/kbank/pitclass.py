@@ -63,10 +63,6 @@ class PitClass:
         bsIndex = self.RevIMap[index]
         self.outcomes = [O for O in self.outcomes if not int(O.bitstr[bsIndex])]
 
-    def updateChances(self, pchances):
-        self.pchances = pchances
-        self.updateProbs()
-
     def getBSProb(self, bitstr):
         prob = 1.0
         for i, ch in enumerate(bitstr):
@@ -95,15 +91,7 @@ class PitClass:
                 outcome.prob *= prob_factor
 
 if __name__ == '__main__':
-    pchances = [[0., 0., 0., 0.],
-                [0., 0., 0., 0.],
-                [0., 0., 0., 0.],
-                [0., 0., 0., 0.]]
-    PC = PitClass([(0, 0), (0, 1), (0, 2)], pchances)
-    pchances[0][0] = 0.2
-    pchances[0][1] = 0.5
-    pchances[0][2] = 0.99
-    PC.updateChances(pchances)
+    PC = PitClass([(0, 0), (0, 1), (0, 2)])
     for outcome in PC.outcomes:
         print(outcome.bitstr, ' = ', outcome.prob)
 

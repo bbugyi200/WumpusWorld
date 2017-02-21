@@ -7,7 +7,6 @@ from .. environment import getIndexes
 from .. import constants as C
 from . death import Death
 from . pitclass import PitClass
-import math
 import abc
 
 
@@ -67,7 +66,6 @@ class BaseBank:
         return directions
 
     def round(self, num):
-        # return math.ceil(num * 1000) / 1000
         return round(num, 3)
 
     def update(self, index):
@@ -75,14 +73,12 @@ class BaseBank:
             return
 
         x, y = index
-
         senses = self.stimArr[x][y]
+
         if C.Wumpus in senses:
             raise Death(C.Wumpus)
         if C.Pit in senses:
             raise Death(C.Pit)
-
-        self.calcProbs()
 
 
 class Uniform(BaseBank):
@@ -197,11 +193,6 @@ class PBank(BaseBank):
         self.Probs = self.ProbTable['P']
         BaseBank.__init__(self, stimArr)
 
-        # self.pchances = [[0.2, 0.2, 0.2, 0.2],
-        #                  [0.2, 0.2, 0.2, 0.2],
-        #                  [0.2, 0.2, 0.2, 0.2],
-        #                  [0.2, 0.2, 0.2, 0.2]]
-
         self.RedSquares = self.partition('even')
         self.BlueSquares = self.partition('odd')
         self.Red = PitClass(self.RedSquares)
@@ -212,7 +203,6 @@ class PBank(BaseBank):
         self.update((0, 0))
 
     def calcProbs(self):
-        # for color, squares in [(self.Red, self.RedSquares), (self.Blue, self.BlueSquares)]:
         for index in self.Indexes:
             if index in self.RedSquares:
                 thisColor = self.Red
@@ -222,11 +212,15 @@ class PBank(BaseBank):
                 adjColor = self.Red
 
             x, y = index
+
             prob = self.round(thisColor.getProb(index))
             if index in self.StenchIndexes:
                 directions = self.getDirections(index, clean=False)
+
+                # Only considers D if WumpProb is not 0 at D
                 directions = [D for D in directions if self.ProbTable['W'][D[0]][D[1]]]
                 adjColor.notAll(directions, 'full')
+
             self.Probs[x][y] = prob
 
     def update(self, index):
@@ -252,16 +246,10 @@ class PBank(BaseBank):
 
         if C.Stench in senses:
             self.StenchIndexes.append(index)
+
+            # Only considers D if WumpProb is not 0 at D
             directions = [D for D in directions if self.ProbTable['W'][D[0]][D[1]]]
             adjColor.notAll(directions, 'full')
-
-        # for index in self.Indexes:
-        #     x, y = index
-        #     GorW = self.ProbTable['W'][x][y] + self.ProbTable['G'][x][y]
-        #     self.pchances[x][y] = self.Inv(GorW) * 0.2
-
-        # self.Red.updateChances(self.pchances)
-        # self.Blue.updateChances(self.pchances)
 
         self.Red.updateProbs()
         self.Blue.updateProbs()
