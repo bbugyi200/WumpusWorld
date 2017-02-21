@@ -1,8 +1,8 @@
-from ..environment import getEnv
-from .pretty import TitlePrint, makePretty
-from ..stimuli import Stimuli
-from ..kbank.kbank import KBank
-from .sims import getTestEnv
+from .. environment import getEnv
+from . pretty import TitlePrint, printEnv, makePretty, bcolors
+from .. stimuli import Stimuli
+from .. kbank.kbank import KBank
+from . sims import getTestEnv
 import os
 
 
@@ -34,8 +34,18 @@ while(True):
                      T.format('Wumpus'),
                      T.format('Gold')))
 
+    # TitlePrint('BitStrings')
+    # print('-----------RED---------------')
+    # print(K.PBank.Red.IMap.items())
+    # for O in K.PBank.Red.outcomes:
+    #     print(O.bitstr, ' = ', O.prob)
+    # print('-----------BLUE---------------')
+    # print(K.PBank.Blue.IMap.items())
+    # for O in K.PBank.Blue.outcomes:
+    #     print(O.bitstr, ' = ', O.prob)
+
     TitlePrint('Environment')
-    print(Env, end='\n\n')
+    printEnv(Env)
 
     print('Position of Agent: ({0},{1})'.format(x, y), end='\n\n')
 
@@ -54,10 +64,10 @@ while(True):
 
     oldIndex = (x, y)
     if len(userInput.split()) == 2:
-        Env[oldIndex] = 'X'
+        Env[oldIndex] = bcolors.GREEN + 'X' + bcolors.ENDC
         x, y = userInput.split()
         x = int(x); y = int(y)
-        Env[x][y] = 'A'
+        Env[x][y] = bcolors.GREEN + bcolors.BOLD + 'A' + bcolors.ENDC
         for Bank in K.BankList:
             Bank.update(index=(x, y))
     elif userInput in 'MN':

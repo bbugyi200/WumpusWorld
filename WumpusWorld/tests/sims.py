@@ -5,15 +5,35 @@ from .. import constants as C
 
 
 def getTestEnv():
-    M1 = np.zeros((4, 4), dtype=int)
+    getTestEnv.counter += 1
     A = C.Agent
     P = C.Pit
+    W = C.Wumpus
+
+    M = np.zeros((4, 4), dtype=int)
+    M[0][0] = A
+
+    M1 = np.copy(M)
     M1[0] = [A, 0, 0, P]
     M1[1] = [0, 0, P, 0]
     M1[2] = [0, P, 0, 0]
     M1[3] = [P, 0, 0, 0]
 
-    return M1
+    M2 = np.copy(M)
+    M2[0] = [A, 0, 0, P]
+    M2[3] = [P, 0, 0, 0]
+
+    M3 = np.copy(M)
+    M3[0] = [A, 0, W, 0]
+    M3[1] = [0, 0, 0, P]
+
+    Envs = [M1, M2, M3]
+    if len(Envs) <= getTestEnv.counter:
+        getTestEnv.counter = 0
+
+    return Envs[getTestEnv.counter]
+
+getTestEnv.counter = -1
 
 
 def testRandomEnvs(loops=100000):
@@ -67,6 +87,3 @@ def PPSim(num, tests=100000, GP=0.2, IncludeGold=False):
             numOfSuccesses += 1
 
     print('{0}%'.format(numOfSuccesses / total * 100))
-
-counts = testRandomEnvs()
-print(counts)

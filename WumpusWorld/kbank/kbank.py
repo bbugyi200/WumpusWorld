@@ -3,9 +3,10 @@
 Agent's Knowledge Bank.
 """
 
-from ..environment import getIndexes
+from .. environment import getIndexes
 from .. import constants as C
-from .death import Death
+from . death import Death
+from . pitclass import PitClass
 import math
 import abc
 
@@ -17,21 +18,21 @@ class BaseBank:
         of each square in the environment being either a pit or a wumpus by
         using sensory data retrieved from each square that the agent has
         visited """
+
+    __metaclass__ = abc.ABCMeta
+
+    KnownWumpus = [False]
+    ProbTable = dict()
+    for Obj in ['P', 'W', 'G']:
+        ProbTable[Obj] = [[0., 0., 0., 0.],
+                          [0., 0., 0., 0.],
+                          [0., 0., 0., 0.],
+                          [0., 0., 0., 0.]]
+
     def __init__(self, stimArr):
-        self.Probs = [[0., 0., 0., 0.],
-                      [0., 0., 0., 0.],
-                      [0., 0., 0., 0.],
-                      [0., 0., 0., 0.]]
-
-        __metaclass__ = abc.ABCMeta
-        self.Indexes = getIndexes()
         self.stimArr = stimArr
+        self.Indexes = getIndexes()
         self.Known = False
-
-    def markSafe(self, index):
-        """ Sets pitProb at index to 0 """
-        x, y = index
-        self.Probs[x][y] = 0.0
 
     def Inv(self, prob):
         if (1 - prob) >= 0:
@@ -43,7 +44,7 @@ class BaseBank:
     def calcProbs(self):
         pass
 
-    def getDirections(self, index):
+    def getDirections(self, index, clean=True):
         """ Returns a list of indexs made up of the following set:
 
             {D: D is an index of a square adjacent to 'index'} """
@@ -56,18 +57,22 @@ class BaseBank:
         dummyDirs = directions[:]
         for D in dummyDirs:
             x, y = D
-            if (D not in self.Indexes) or \
-               (self.Probs[x][y] == 0.0) or \
-               (self.Probs[x][y] == 1.0):
+            if D not in self.Indexes:
+                directions.remove(D)
+            elif clean:
+                if (self.Probs[x][y] == 0.0) or \
+                   (self.Probs[x][y] == 1.0):
                     directions.remove(D)
 
         return directions
 
+    def round(self, num):
+        # return math.ceil(num * 1000) / 1000
+        return round(num, 3)
+
     def update(self, index):
         if not (index in self.Indexes):
             return
-
-        self.Indexes.remove(index)
 
         x, y = index
 
@@ -76,8 +81,6 @@ class BaseBank:
             raise Death(C.Wumpus)
         if C.Pit in senses:
             raise Death(C.Pit)
-        else:
-            self.markSafe(index)
 
         self.calcProbs()
 
@@ -96,9 +99,11 @@ class Uniform(BaseBank):
         self.update((0, 0))
 
     def markSafe(self, index):
-        BaseBank.markSafe(self, index)
         x, y = index
-        self.Kbase[x][y][0][0] -= 1
+        self.Probs[x][y] = 0.0
+        K = self.Kbase[x][y]
+        P = K[0]
+        P[0] -= 1
         self.Kbase[x][y] = [[0]]
 
     def uniformDistribution(self):
@@ -107,7 +112,7 @@ class Uniform(BaseBank):
         for index in self.Indexes:
             x, y = index
             self.Kbase[x][y].append(self.listOfPercepts[PerceptIndex])
-            self.Probs[x][y] = math.ceil(1 / 15 * 1000) / 1000
+            self.Probs[x][y] = self.round(1 / 15)
 
     def calcProbs(self):
         """ Uses percepts to calculate the pitProb of each square """
@@ -123,19 +128,26 @@ class Uniform(BaseBank):
                     Prob = 1 / P
                 except:
                     print('x:{0}\ny:{1}\nP:{2}'.format(x, y, P))
-                Prob = math.ceil((Prob * 1000)) / 1000
+                Prob = self.round(Prob)
 
                 self.Probs[x][y] = Prob
                 if Prob == 1.0:
                     self.Known = True
 
+    def update(self, index):
+        BaseBank.update(self, index)
+        if index in self.Indexes:
+            self.Indexes.remove(index)
+
 
 class WBank(Uniform):
     def __init__(self, stimArr):
+        self.Probs = self.ProbTable['W']
         Uniform.__init__(self, stimArr)
 
     def update(self, index):
         Uniform.update(self, index)
+        self.markSafe(index)
 
         x, y = index
         senses = self.stimArr[x][y]
@@ -152,10 +164,20 @@ class WBank(Uniform):
 
         self.calcProbs()
 
+    def calcProbs(self):
+        Uniform.calcProbs(self)
+        if self.Known:
+            self.KnownWumpus[0] = True
+
 
 class GBank(Uniform):
+    def __init__(self, stimArr):
+        self.Probs = self.ProbTable['G']
+        Uniform.__init__(self, stimArr)
+
     def update(self, index):
         Uniform.update(self, index)
+        self.markSafe(index)
 
         x, y = index
         senses = self.stimArr[x][y]
@@ -167,15 +189,86 @@ class GBank(Uniform):
         else:
             self.markSafe(index)
 
+        self.calcProbs()
+
 
 class PBank(BaseBank):
     def __init__(self, stimArr):
+        self.Probs = self.ProbTable['P']
         BaseBank.__init__(self, stimArr)
+
+        # self.pchances = [[0.2, 0.2, 0.2, 0.2],
+        #                  [0.2, 0.2, 0.2, 0.2],
+        #                  [0.2, 0.2, 0.2, 0.2],
+        #                  [0.2, 0.2, 0.2, 0.2]]
+
+        self.RedSquares = self.partition('even')
+        self.BlueSquares = self.partition('odd')
+        self.Red = PitClass(self.RedSquares)
+        self.Blue = PitClass(self.BlueSquares)
+
+        self.StenchIndexes = []
+
+        self.update((0, 0))
+
+    def calcProbs(self):
+        # for color, squares in [(self.Red, self.RedSquares), (self.Blue, self.BlueSquares)]:
+        for index in self.Indexes:
+            if index in self.RedSquares:
+                thisColor = self.Red
+                adjColor = self.Blue
+            elif index in self.BlueSquares:
+                thisColor = self.Blue
+                adjColor = self.Red
+
+            x, y = index
+            prob = self.round(thisColor.getProb(index))
+            if index in self.StenchIndexes:
+                directions = self.getDirections(index, clean=False)
+                directions = [D for D in directions if self.ProbTable['W'][D[0]][D[1]]]
+                adjColor.notAll(directions, 'full')
+            self.Probs[x][y] = prob
 
     def update(self, index):
         BaseBank.update(self, index)
 
-    def Partition(self, parity='even'):
+        x, y = index
+        senses = self.stimArr[x][y]
+        directions = self.getDirections(index, clean=False)
+
+        if index in self.RedSquares:
+            thisColor = self.Red
+            adjColor = self.Blue
+        elif index in self.BlueSquares:
+            thisColor = self.Blue
+            adjColor = self.Red
+
+        thisColor.noChanceOfPit(index)
+        if C.Wind in senses:
+            adjColor.notAll(directions)
+        else:
+            for D in directions:
+                adjColor.noChanceOfPit(D)
+
+        if C.Stench in senses:
+            self.StenchIndexes.append(index)
+            directions = [D for D in directions if self.ProbTable['W'][D[0]][D[1]]]
+            adjColor.notAll(directions, 'full')
+
+        # for index in self.Indexes:
+        #     x, y = index
+        #     GorW = self.ProbTable['W'][x][y] + self.ProbTable['G'][x][y]
+        #     self.pchances[x][y] = self.Inv(GorW) * 0.2
+
+        # self.Red.updateChances(self.pchances)
+        # self.Blue.updateChances(self.pchances)
+
+        self.Red.updateProbs()
+        self.Blue.updateProbs()
+
+        self.calcProbs()
+
+    def partition(self, parity='even'):
         if parity == 'even':
             parity = True
         elif parity == 'odd':
@@ -198,8 +291,8 @@ class PBank(BaseBank):
 
 class KBank:
     def __init__(self, stimArr):
-        self.PBank = PBank(stimArr)
         self.WBank = WBank(stimArr)
         self.GBank = GBank(stimArr)
+        self.PBank = PBank(stimArr)
 
-        self.BankList = [self.PBank, self.WBank, self.GBank]
+        self.BankList = [self.GBank, self.WBank, self.PBank]
