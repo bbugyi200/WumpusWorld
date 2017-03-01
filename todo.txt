@@ -3,9 +3,6 @@
 [X] Alter pProb to account for 1/15 probability of gold
 [X] Implement wProb array
 [X] Implement gProb array
-[] Fix pProb so it scales (55%)
-[] Stop cutting off decimals from probs
-[] Implement class that handles dependent probabilities. List sharing method has too much overhead.
-[] Refactor 'calcProbs' function
-[] gProb should change when Wumpus or Pit is known to exist in certain set of squares
-[] Make start.py accept function calls
+[X] Fix pProb so it scales (55%)
+[X] Stop cutting off decimals from probs
+

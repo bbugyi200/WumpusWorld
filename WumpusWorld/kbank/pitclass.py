@@ -38,11 +38,11 @@ class PitClass:
                 totalProb += outcome.prob
         return totalProb
 
-    def notAll(self, directions, X='empty'):
+    def notAll(self, indexes, X='empty'):
         bsIndexes = []
         badStrings = []
-        for D in directions:
-            bsIndexes.append(self.RevIMap[D])
+        for index in indexes:
+            bsIndexes.append(self.RevIMap[index])
         for outcome in self.outcomes:
 
             if X == 'empty':
@@ -52,7 +52,7 @@ class PitClass:
 
             match = True
             for index in bsIndexes:
-                if int(outcome.bitstr[index]) - Neg:
+                if abs(int(outcome.bitstr[index]) - Neg):
                     match = False
             if match:
                 badStrings.append(outcome.bitstr)

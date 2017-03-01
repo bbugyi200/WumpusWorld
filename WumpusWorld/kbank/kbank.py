@@ -188,7 +188,7 @@ class GBank(Uniform):
         self.calcProbs()
 
 
-class PBank(BaseBank):
+class PBankRB(BaseBank):
     def __init__(self, stimArr):
         self.Probs = self.ProbTable['P']
         BaseBank.__init__(self, stimArr)
@@ -217,9 +217,11 @@ class PBank(BaseBank):
             if index in self.StenchIndexes:
                 directions = self.getDirections(index, clean=False)
 
-                # Only considers D if WumpProb is not 0 at D
-                directions = [D for D in directions if self.ProbTable['W'][D[0]][D[1]]]
-                adjColor.notAll(directions, 'full')
+                for D in directions:
+                    # Only considers D if WumpProb is not 0 at D
+                    directions = [D for D in directions if self.ProbTable['W'][D[0]][D[1]]]
+                    print("self.ProbTable['W'][D[0]][D[1]] ---> ", self.ProbTable['W'][D[0]][D[1]])
+                    adjColor.notAll(directions, 'full')
 
             self.Probs[x][y] = prob
 
@@ -277,10 +279,56 @@ class PBank(BaseBank):
         return partition
 
 
+class PBankFull(BaseBank):
+    def __init__(self, stimArr):
+        self.Probs = self.ProbTable['P']
+        BaseBank.__init__(self, stimArr)
+
+        self.PC = PitClass(self.Indexes)
+
+        self.update((0, 0))
+
+    def calcProbs(self):
+        for index in self.Indexes:
+            x, y = index
+
+            prob = self.round(self.PC.getProb(index))
+
+            self.Probs[x][y] = prob
+
+    def update(self, index):
+        BaseBank.update(self, index)
+
+        x, y = index
+        senses = self.stimArr[x][y]
+        directions = self.getDirections(index, clean=False)
+
+        self.PC.noChanceOfPit(index)
+        if C.Wind in senses:
+            self.PC.notAll(directions)
+        else:
+            for D in directions:
+                self.PC.noChanceOfPit(D)
+
+        PossibleWumpus = []
+        PossibleGold = []
+        for index in self.Indexes:
+            x, y = index
+            if self.ProbTable['W'][x][y]: PossibleWumpus.append(index)
+            if self.ProbTable['G'][x][y]: PossibleGold.append(index)
+
+        self.PC.notAll(PossibleWumpus, X='full')
+        self.PC.notAll(PossibleGold, X='full')
+
+        self.PC.updateProbs()
+
+        self.calcProbs()
+
+
 class KBank:
     def __init__(self, stimArr):
         self.WBank = WBank(stimArr)
         self.GBank = GBank(stimArr)
-        self.PBank = PBank(stimArr)
+        self.PBank = PBankFull(stimArr)
 
         self.BankList = [self.GBank, self.WBank, self.PBank]

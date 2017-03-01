@@ -4,6 +4,7 @@ from .. stimuli import Stimuli
 from .. kbank.kbank import KBank
 from . sims import getTestEnv
 import os
+import numpy as np
 
 
 env = getEnv()
@@ -26,13 +27,13 @@ while(True):
                      str(K.WBank.Probs[1]),
                      str(K.WBank.Probs[2]),
                      str(K.WBank.Probs[3]),
-                     str(K.GBank.Probs[0]),
-                     str(K.GBank.Probs[1]),
-                     str(K.GBank.Probs[2]),
-                     str(K.GBank.Probs[3]),
+                     str(np.array(K.WBank.Probs[0]) + np.array(K.PBank.Probs[0])),
+                     str(np.array(K.WBank.Probs[1]) + np.array(K.PBank.Probs[1])),
+                     str(np.array(K.WBank.Probs[2]) + np.array(K.PBank.Probs[2])),
+                     str(np.array(K.WBank.Probs[3]) + np.array(K.PBank.Probs[3])),
                      T.format('Pit'),
                      T.format('Wumpus'),
-                     T.format('Gold')))
+                     T.format('Death')))
 
     # TitlePrint('BitStrings')
     # print('-----------RED---------------')
