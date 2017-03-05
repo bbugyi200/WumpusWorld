@@ -7,6 +7,21 @@ import os
 import numpy as np
 
 
+class _GetchUnix:
+    def __init__(self):
+        import tty, sys
+
+    def __call__(self):
+        import sys, tty, termios
+        fd = sys.stdin.fileno()
+        old_settings = termios.tcgetattr(fd)
+        try:
+            tty.setraw(sys.stdin.fileno())
+            ch = sys.stdin.read(1)
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+        return ch
+
 env = getEnv()
 Env = makePretty(env)
 
@@ -50,7 +65,8 @@ while(True):
 
     print('Position of Agent: ({0},{1})'.format(x, y), end='\n\n')
 
-    userInput = input('>>> ')
+    getch = _GetchUnix()
+    userInput = getch()
     os.system('clear')
 
     """ Instructions
@@ -58,19 +74,35 @@ while(True):
      print('~~~ Input Options ~~~',
            '1. Enter Index (x y) to move agent.',
            '2. Enter N to get a new random (non-modified) environment.',
-           '3. Enter M to get a new random (modified) environment.',
+           '3. Enter M to get a new modified environment.',
            sep='\n',
            end='\n\n')
     """
 
     oldIndex = (x, y)
-    if len(userInput.split()) == 2:
+    # if len(userInput.split()) == 2:
+    #     Env[oldIndex] = bcolors.GREEN + 'X' + bcolors.ENDC
+    #     x, y = userInput.split()
+    #     x = int(x); y = int(y)
+    #     Env[x][y] = bcolors.GREEN + bcolors.BOLD + 'A' + bcolors.ENDC
+    #     for Bank in K.BankList:
+    #         Bank.update(index=(x, y))
+
+    if userInput in 'hjkl':
         Env[oldIndex] = bcolors.GREEN + 'X' + bcolors.ENDC
-        x, y = userInput.split()
-        x = int(x); y = int(y)
+
+        if userInput == 'j':
+            K.down()
+        elif userInput == 'k':
+            K.up()
+        elif userInput == 'h':
+            K.left()
+        elif userInput == 'l':
+            K.right()
+
+        x, y = K.location
         Env[x][y] = bcolors.GREEN + bcolors.BOLD + 'A' + bcolors.ENDC
-        for Bank in K.BankList:
-            Bank.update(index=(x, y))
+
     elif userInput in 'MN':
         if userInput == 'M':
             env = getTestEnv()
@@ -86,3 +118,5 @@ while(True):
         for row in K.pKbase:
             print(row)
         print()
+    elif userInput == 'Q':
+        exit()

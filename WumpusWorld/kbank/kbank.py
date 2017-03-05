@@ -8,6 +8,7 @@ from .. import constants as C
 from . death import Death
 from . pitclass import PitClass
 import abc
+from . helpers import getDirections as getDirs
 
 
 class BaseBank:
@@ -33,26 +34,13 @@ class BaseBank:
         self.Indexes = getIndexes()
         self.Known = False
 
-    def Inv(self, prob):
-        if (1 - prob) >= 0:
-            return (1 - prob)
-        else:
-            return 0.0
-
     @abc.abstractmethod
     def calcProbs(self):
         pass
 
     def getDirections(self, index, clean=True):
-        """ Returns a list of indexs made up of the following set:
-
-            {D: D is an index of a square adjacent to 'index'} """
-        x, y = index
-        directions = [(x + 1, y),  # right
-                      (x - 1, y),  # left
-                      (x, y + 1),  # down
-                      (x, y - 1)]  # up
-
+        directions = getDirs(index)
+        directions = [D for D in directions]
         dummyDirs = directions[:]
         for D in dummyDirs:
             x, y = D
@@ -64,9 +52,6 @@ class BaseBank:
                     directions.remove(D)
 
         return directions
-
-    def round(self, num):
-        return round(num, 3)
 
     def update(self, index):
         if not (index in self.Indexes):
@@ -108,7 +93,7 @@ class Uniform(BaseBank):
         for index in self.Indexes:
             x, y = index
             self.Kbase[x][y].append(self.listOfPercepts[PerceptIndex])
-            self.Probs[x][y] = self.round(1 / 15)
+            self.Probs[x][y] = round(1 / 15, 3)
 
     def calcProbs(self):
         """ Uses percepts to calculate the pitProb of each square """
@@ -124,7 +109,7 @@ class Uniform(BaseBank):
                     Prob = 1 / P
                 except:
                     print('x:{0}\ny:{1}\nP:{2}'.format(x, y, P))
-                Prob = self.round(Prob)
+                Prob = round(Prob, 3)
 
                 self.Probs[x][y] = Prob
                 if Prob == 1.0:
@@ -213,7 +198,7 @@ class PBankRB(BaseBank):
 
             x, y = index
 
-            prob = self.round(thisColor.getProb(index))
+            prob = round(thisColor.getProb(index), 3)
             if index in self.StenchIndexes:
                 directions = self.getDirections(index, clean=False)
 
@@ -292,7 +277,7 @@ class PBankFull(BaseBank):
         for index in self.Indexes:
             x, y = index
 
-            prob = self.round(self.PC.getProb(index))
+            prob = round(self.PC.getProb(index), 3)
 
             self.Probs[x][y] = prob
 
@@ -331,4 +316,27 @@ class KBank:
         self.GBank = GBank(stimArr)
         self.PBank = PBankFull(stimArr)
 
+        self.location = (0, 0)
+
         self.BankList = [self.GBank, self.WBank, self.PBank]
+
+    def update(self, index):
+        self.location = index
+        for Bank in self.BankList:
+            Bank.update(index)
+
+    def left(self):
+        index = getDirs(self.location).left
+        self.update(index)
+
+    def right(self):
+        index = getDirs(self.location).right
+        self.update(index)
+
+    def up(self):
+        index = getDirs(self.location).up
+        self.update(index)
+
+    def down(self):
+        index = getDirs(self.location).down
+        self.update(index)
