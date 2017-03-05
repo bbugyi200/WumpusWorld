@@ -11,9 +11,9 @@ def getDirections(index):
         {D: D is an index of a square adjacent to 'index'} """
     x, y = index
     Dirs = namedtuple('Dirs', 'up right down left')
-    directions = Dirs(right=(x + 1, y),  # right
-                      left=(x - 1, y),  # left
-                      down=(x, y + 1),  # down
-                      up=(x, y - 1))  # up
+    directions = Dirs(down=(x + 1, y),
+                      up=(x - 1, y),
+                      right=(x, y + 1),
+                      left=(x, y - 1))
 
     return directions

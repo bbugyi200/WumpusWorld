@@ -5,7 +5,7 @@
 [X] Implement gProb array
 [X] Fix pProb so it scales (55%)
 [X] Stop cutting off decimals from probs
-[] Create Left, Right, Up, and Down functions (Use KBank class)
+[X] Create Left, Right, Up, and Down functions (Use KBank class)
 [] Create Utility Function
 [] Create getPath and getDistance functions
 [] Create Agent class, which integrates the Utility and KBank objects

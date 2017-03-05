@@ -63,7 +63,7 @@ while(True):
     TitlePrint('Environment')
     printEnv(Env)
 
-    print('Position of Agent: ({0},{1})'.format(x, y), end='\n\n')
+    print('Position of Agent: ({0},{1})'.format(x, y), end='\n')
 
     getch = _GetchUnix()
     userInput = getch()
@@ -72,7 +72,7 @@ while(True):
     """ Instructions
 
      print('~~~ Input Options ~~~',
-           '1. Enter Index (x y) to move agent.',
+           '1. hjkl commands to move',
            '2. Enter N to get a new random (non-modified) environment.',
            '3. Enter M to get a new modified environment.',
            sep='\n',
@@ -80,13 +80,6 @@ while(True):
     """
 
     oldIndex = (x, y)
-    # if len(userInput.split()) == 2:
-    #     Env[oldIndex] = bcolors.GREEN + 'X' + bcolors.ENDC
-    #     x, y = userInput.split()
-    #     x = int(x); y = int(y)
-    #     Env[x][y] = bcolors.GREEN + bcolors.BOLD + 'A' + bcolors.ENDC
-    #     for Bank in K.BankList:
-    #         Bank.update(index=(x, y))
 
     if userInput in 'hjkl':
         Env[oldIndex] = bcolors.GREEN + 'X' + bcolors.ENDC
@@ -113,10 +106,6 @@ while(True):
         x, y = (0, 0)
         stimArr = Stimuli(env).stimArr
         K = KBank(stimArr)
-    elif userInput == 'P':
-        TitlePrint('Percepts')
-        for row in K.pKbase:
-            print(row)
-        print()
+
     elif userInput == 'Q':
         exit()
