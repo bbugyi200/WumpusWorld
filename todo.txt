@@ -6,6 +6,7 @@
 [X] Fix pProb so it scales (55%)
 [X] Stop cutting off decimals from probs
 [X] Create Left, Right, Up, and Down functions (Use KBank class)
-[] Define DeathProb
-[] Define maxUtility()
-[] Define getPath()
+[X] Define DeathProb
+[X] Define maxUtility()
+[X] Define getPath()
+[] Setup live demo (timed and automatic)
