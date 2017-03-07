@@ -16,21 +16,12 @@ in their text, "Artificial Intelligence: A Modern Apprach":
 import numpy as np
 import random
 from . import constants as C
+from . constants import getIndexes
 
 
 # dtype=np.int sets the element type to integers
 env = np.zeros((4, 4), dtype=np.int)
 
-
-def getIndexes():
-    """ Fills 'Indexes' list with all potential coordinate locations in
-        environment. This will act as an index set for the Wumpus World
-        environment. Indexes = [(0,0), (0,1), ..., (3,2), (3,3)] """
-    Indexes = []
-    for x in range(4):
-        for y in range(4):
-            Indexes.append((x, y))
-    return Indexes
 
 Indexes = getIndexes()
 

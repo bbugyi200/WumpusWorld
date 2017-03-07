@@ -6,6 +6,6 @@
 [X] Fix pProb so it scales (55%)
 [X] Stop cutting off decimals from probs
 [X] Create Left, Right, Up, and Down functions (Use KBank class)
-[] Create Utility Function
-[] Create getPath and getDistance functions
-[] Create Agent class, which integrates the Utility and KBank objects
+[] Define DeathProb
+[] Define maxUtility()
+[] Define getPath()

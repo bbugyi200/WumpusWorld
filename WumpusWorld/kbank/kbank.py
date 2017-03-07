@@ -8,7 +8,7 @@ from .. import constants as C
 from . death import Death
 from . pitclass import PitClass
 import abc
-from . helpers import getDirections as getDirs
+from .. constants import getDirections as getDirs
 
 
 class BaseBank:
@@ -61,9 +61,11 @@ class BaseBank:
         senses = self.stimArr[x][y]
 
         if C.Wumpus in senses:
-            raise Death(C.Wumpus)
+            print("THE AGENT IS DEAD!!! (Wumpus)")
+            # raise Death(C.Wumpus)
         if C.Pit in senses:
-            raise Death(C.Pit)
+            print("THE AGENT IS DEAD!!! (Pit)")
+            # raise Death(C.Pit)
 
 
 class Uniform(BaseBank):
@@ -317,26 +319,24 @@ class KBank:
         self.PBank = PBankFull(stimArr)
 
         self.location = (0, 0)
+        self.Indexes = getIndexes()
+
+        self.visited = {(0, 0)}
+        self.options = {(0, 1), (1, 0)}
 
         self.BankList = [self.GBank, self.WBank, self.PBank]
 
     def update(self, index):
         self.location = index
+        if index in self.Indexes:
+            self.Indexes.remove(index)
+        self.visited.add(index)
+        for D in getDirs(index):
+            if (D in self.Indexes) and (D not in self.visited):
+                self.options.add(D)
+
+        if index in self.options:
+            self.options.remove(index)
+
         for Bank in self.BankList:
             Bank.update(index)
-
-    def left(self):
-        index = getDirs(self.location).left
-        self.update(index)
-
-    def right(self):
-        index = getDirs(self.location).right
-        self.update(index)
-
-    def up(self):
-        index = getDirs(self.location).up
-        self.update(index)
-
-    def down(self):
-        index = getDirs(self.location).down
-        self.update(index)
