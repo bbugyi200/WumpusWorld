@@ -19,10 +19,10 @@ class Agent:
         options = self.KB.options
 
         if C.Gold in self.stimArr[x][y]:
-            target, path = self.maxUtility([(0, 0)])
+            path = self.maxUtility([(0, 0)])
             print("THE AGENT HAS FOUND THE GOLD IN {0} MOVES!!!".format(self.mCount))
         else:
-            target, path = self.maxUtility(options)
+            path = self.maxUtility(options)
         for action in self.getActionSequence(path, []):
             self.mCount += 1
             print('action  = ', action)
@@ -38,11 +38,14 @@ class Agent:
 
         Min = min(DeathProbs.values())
         options = []
-        for index, prob in DeathProbs.items():
-            if prob == Min:
-                options.append(index)
+        if Min < 0.5:
+            for index, prob in DeathProbs.items():
+                if prob == Min:
+                    options.append(index)
+        else:
+            print("FORFEIT!")
+            options = [(0, 0)]
 
-        target = ...
         path = ...
         Min = 100
         for index in options:
@@ -51,10 +54,9 @@ class Agent:
             D = len(P)
             if D < Min:
                 Min = D
-                target = index
                 path = P
 
-        return target, path
+        return path
 
     def getActionSequence(self, path, ActionSeq):
         if len(path) < 2:
