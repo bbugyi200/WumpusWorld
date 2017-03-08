@@ -4,11 +4,11 @@ from ..environment import getEnv
 from .. import constants as C
 
 
-def getTestEnv():
-    getTestEnv.counter += 1
+def getTestEnv(num=0):
     A = C.Agent
     P = C.Pit
     W = C.Wumpus
+    G = C.Gold
 
     M = np.zeros((4, 4), dtype=int)
     M[0][0] = A
@@ -27,11 +27,22 @@ def getTestEnv():
     M3[0] = [A, 0, W, 0]
     M3[1] = [0, 0, 0, P]
 
-    Envs = [M1, M2, M3]
-    if len(Envs) <= getTestEnv.counter:
-        getTestEnv.counter = 0
+    M4 = np.copy(M)
+    M4[0] = [A, 0, P, G]
+    M4[1] = [0, 0, P, 0]
+    M4[3] = [W, 0, 0, 0]
 
-    return Envs[getTestEnv.counter]
+    Envs = [M1, M2, M3, M4]
+
+    num = int(num)
+    if num:
+        return Envs[num - 1]
+    else:
+        getTestEnv.counter += 1
+        if len(Envs) <= getTestEnv.counter:
+            getTestEnv.counter = 0
+
+        return Envs[getTestEnv.counter]
 
 getTestEnv.counter = -1
 
