@@ -3,7 +3,7 @@
 Set of functions that can be used to mathematically assess properties of the
 Wumpus World environment """
 
-from environment import getEnv, getIndexes
+from . environment import getEnv, getIndexes
 
 Indexes = getIndexes()
 

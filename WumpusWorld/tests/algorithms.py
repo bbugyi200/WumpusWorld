@@ -12,6 +12,7 @@ def TestSolvable(verbose=False, displayMax=10, loops=10000):
     """ Tests the Solvable function """
     loops = int(loops)
     displayMax = int(displayMax)
+    verbose = int(verbose)
 
     if verbose:
         title = '*** Sample Subset of Unsolvable Environments Found ***'

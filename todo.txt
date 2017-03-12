@@ -9,4 +9,6 @@
 [X] Define DeathProb
 [X] Define maxUtility()
 [X] Define getPath()
+[X] Use parseoptions Python Library for start.py
+[] Implement Boolean Product Solvable function
 [] Setup live demo (timed and automatic)
