@@ -99,12 +99,15 @@ while(True):
         x, y = A.KB.location
         Env[x][y] = bcolors.GREEN + bcolors.BOLD + 'A' + bcolors.ENDC
 
-    elif userInput in 'MN0123456789':
+    elif userInput in 'MNF0123456789':
         if userInput == 'M':
             env = getTestEnv()
             Env = makePretty(env)
         elif userInput == 'N':
             env = getEnv()
+            Env = makePretty(env)
+        elif userInput == 'F':
+            env = getEnv(fair=True)
             Env = makePretty(env)
         else:
             env = getTestEnv(userInput)

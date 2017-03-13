@@ -10,5 +10,6 @@
 [X] Define maxUtility()
 [X] Define getPath()
 [X] Use parseoptions Python Library for start.py
-[] Implement Boolean Product Solvable function
+[] Analyze Forfeit, Win, and Lose ratios (using fair map)
 [] Setup live demo (timed and automatic)
+[] Implement Boolean Product Solvable function

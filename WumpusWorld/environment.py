@@ -72,9 +72,12 @@ def refreshGlobals():
     env = np.zeros((4, 4), dtype=np.int)
 
 
-def getEnv():
+def getEnv(fair=False):
     """ Returns a new Wumpus World environment """
     refreshGlobals()
+    if fair:
+        Indexes.remove((0, 1))
+        Indexes.remove((1, 0))
     setAgent()
     setGold()
     setWumpus()
