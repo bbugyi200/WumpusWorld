@@ -10,6 +10,11 @@
 [X] Define maxUtility()
 [X] Define getPath()
 [X] Use parseoptions Python Library for start.py
+[] Fix/Remove Death Class
 [] Analyze Forfeit, Win, and Lose ratios (using fair map)
 [] Setup live demo (timed and automatic)
+
+===== Low Priority =====
+[] Implement cost KB and cost-based utility function
 [] Implement Boolean Product Solvable function
+[] Add documentation (comment strings) for classes and functions
