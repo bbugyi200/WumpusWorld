@@ -5,7 +5,6 @@ Agent's Knowledge Bank.
 
 from .. environment import getIndexes
 from .. import constants as C
-from . death import Death
 from . pitclass import PitClass
 import abc
 from .. constants import getDirections as getDirs
@@ -52,20 +51,6 @@ class BaseBank:
                     directions.remove(D)
 
         return directions
-
-    def update(self, index):
-        if not (index in self.Indexes):
-            return
-
-        x, y = index
-        senses = self.stimArr[x][y]
-
-        if C.Wumpus in senses:
-            print("THE AGENT IS DEAD!!! (Wumpus)")
-            # raise Death(C.Wumpus)
-        if C.Pit in senses:
-            print("THE AGENT IS DEAD!!! (Pit)")
-            # raise Death(C.Pit)
 
 
 class Uniform(BaseBank):
@@ -118,7 +103,6 @@ class Uniform(BaseBank):
                     self.Known = True
 
     def update(self, index):
-        BaseBank.update(self, index)
         if index in self.Indexes:
             self.Indexes.remove(index)
 
@@ -213,8 +197,6 @@ class PBankRB(BaseBank):
             self.Probs[x][y] = prob
 
     def update(self, index):
-        BaseBank.update(self, index)
-
         x, y = index
         senses = self.stimArr[x][y]
         directions = self.getDirections(index, clean=False)
@@ -284,8 +266,6 @@ class PBankFull(BaseBank):
             self.Probs[x][y] = prob
 
     def update(self, index):
-        BaseBank.update(self, index)
-
         x, y = index
         senses = self.stimArr[x][y]
         directions = self.getDirections(index, clean=False)

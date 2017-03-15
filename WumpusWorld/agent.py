@@ -14,20 +14,41 @@ class Agent:
                         'down': self.down}
         self.Log = []
 
-    def run(self):
+    def act(self):
         x, y = self.KB.location
         options = self.KB.options
+        senses = self.stimArr[x][y]
 
-        if C.Gold in self.stimArr[x][y]:
+        if C.Gold in senses:
             path = self.maxUtility([(0, 0)])
-            print("THE AGENT HAS FOUND THE GOLD IN {0} MOVES!!!".format(self.mCount))
         else:
             path = self.maxUtility(options)
+
         for action in self.getActionSequence(path, []):
             self.mCount += 1
             print('action  = ', action)
             self.Log.append(action)
             action()
+
+        self.react()
+
+    def react(self):
+        """ React to Gold, Pit, or Wumpus """
+
+        deathSen = "\nTHE AGENT HAS ENTERED A ROOM WITH A {0}!!! SHE IS DEAD!!!"
+        goldSen = "\nTHE AGENT HAS FOUND THE GOLD IN {0} MOVES!!!"
+        sentences = {C.Gold: goldSen.format(self.mCount),
+                     C.Pit: deathSen.format("PIT"),
+                     C.Wumpus: deathSen.format("WUMPUS")}
+
+        x, y = self.KB.location
+        senses = self.stimArr[x][y]
+        if C.Gold in senses:
+            print(sentences[C.Gold])
+        elif C.Wumpus in senses:
+            print(sentences[C.Wumpus])
+        elif C.Pit in senses:
+            print(sentences[C.Pit])
 
     def maxUtility(self, options):
         DeathProbs = dict()

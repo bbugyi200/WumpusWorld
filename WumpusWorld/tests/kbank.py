@@ -94,7 +94,7 @@ while(True):
         elif userInput == 'l':
             A.right()
         elif userInput == 'r':
-            A.run()
+            A.act()
 
         x, y = A.KB.location
         Env[x][y] = bcolors.GREEN + bcolors.BOLD + 'A' + bcolors.ENDC
