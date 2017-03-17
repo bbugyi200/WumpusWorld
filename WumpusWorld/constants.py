@@ -12,6 +12,25 @@ Gold = 4
 Wind = 5
 Stench = 6
 
+EnvSize = 4
+
+
+def getMatrix(item):
+    matrix = []
+    try:
+        copy = getattr(item, 'copy')
+    except AttributeError:
+        copy = None
+    for i in range(EnvSize):
+        matrix.append([])
+        for j in range(EnvSize):
+            if copy:
+                matrix[i].append(copy())
+            else:
+                matrix[i].append(item)
+
+    return matrix
+
 
 def getDirections(index):
     """ Returns a list of indexs made up of the following set:
@@ -32,8 +51,8 @@ def getIndexes():
         environment. This will act as an index set for the Wumpus World
         environment. Indexes = [(0,0), (0,1), ..., (3,2), (3,3)] """
     Indexes = []
-    for x in range(4):
-        for y in range(4):
+    for x in range(EnvSize):
+        for y in range(EnvSize):
             Indexes.append((x, y))
     return Indexes
 

@@ -1,4 +1,5 @@
 from .. import constants as C
+import copy
 
 
 class bcolors:
@@ -14,7 +15,8 @@ class bcolors:
 
 def makePretty(env):
     """ Takes random environment and makes it easier on the eyes """
-    Env = env.astype(str)
+    # Env = env.astype(str)
+    Env = copy.deepcopy(env)
 
     for i in range(len(Env)):
         for j in range(len(Env[i])):

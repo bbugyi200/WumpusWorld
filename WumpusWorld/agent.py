@@ -1,6 +1,8 @@
 from . kbank.kbank import KBank
 from . constants import getDirections, getPath, getGraph
 from . import constants as C
+import time
+import os
 
 
 class Agent:
@@ -13,6 +15,9 @@ class Agent:
                         'up': self.up,
                         'down': self.down}
         self.Log = []
+        self.dead = False
+        self.forfeit = False
+        self.foundG = False
 
     def act(self):
         x, y = self.KB.location
@@ -44,11 +49,20 @@ class Agent:
         x, y = self.KB.location
         senses = self.stimArr[x][y]
         if C.Gold in senses:
+            os.system('clear')
             print(sentences[C.Gold])
+            time.sleep(2)
+            self.foundG = True
         elif C.Wumpus in senses:
+            os.system('clear')
             print(sentences[C.Wumpus])
+            time.sleep(2)
+            self.dead = True
         elif C.Pit in senses:
+            os.system('clear')
             print(sentences[C.Pit])
+            time.sleep(2)
+            self.dead = True
 
     def maxUtility(self, options):
         DeathProbs = dict()
@@ -64,8 +78,11 @@ class Agent:
                 if prob == Min:
                     options.append(index)
         else:
-            print("FORFEIT!")
+            os.system('clear')
+            print("THE AGENT HAS FORFEITED THE GAME!")
+            time.sleep(1)
             options = [(0, 0)]
+            self.forfeit = True
 
         path = ...
         Min = 100

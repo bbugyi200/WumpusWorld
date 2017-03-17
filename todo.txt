@@ -11,8 +11,8 @@
 [X] Define getPath()
 [X] Use parseoptions Python Library for start.py
 [X] Fix/Remove Death Class
+[X] Reduce pitclass bitstrings to only calculate V squares and ~V squares adjacent to V squares
 [] Analyze Forfeit, Win, and Lose ratios (using fair map)
-[] Reduce pitclass bitstrings to only calculate V squares and ~V squares adjacent to V squares
 [] Setup live demo (timed and automatic)
 
 ===== Low Priority =====

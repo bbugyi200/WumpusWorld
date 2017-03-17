@@ -14,10 +14,7 @@ class Stimuli:
     """ Holds state information relating to the sensory data that the agent
         would perceive at each square in the Wumpus World environment (env) """
     def __init__(self, env):
-        self.stimArr = [[set(), set(), set(), set()],
-                        [set(), set(), set(), set()],
-                        [set(), set(), set(), set()],
-                        [set(), set(), set(), set()]]
+        self.stimArr = C.getMatrix(set())
 
         # Loops through each element in stimArr and sets the senses of that
         # element to correspond with the elements of env found to the left,

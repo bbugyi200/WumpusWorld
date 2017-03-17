@@ -20,7 +20,8 @@ from . constants import getIndexes
 
 
 # dtype=np.int sets the element type to integers
-env = np.zeros((4, 4), dtype=np.int)
+env = C.getMatrix(0)
+# env = np.zeros((5, 5), dtype=np.int)
 
 
 Indexes = getIndexes()
@@ -69,7 +70,8 @@ def refreshGlobals():
     global Indexes
     global env
     Indexes = getIndexes()
-    env = np.zeros((4, 4), dtype=np.int)
+    env = C.getMatrix(0)
+    # env = np.zeros((5, 5), dtype=np.int)
 
 
 def getEnv(fair=False):

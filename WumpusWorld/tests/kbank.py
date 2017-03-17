@@ -5,7 +5,9 @@ from .. kbank.kbank import KBank
 from .. agent import Agent
 from . sims import getTestEnv
 import os
+import sys
 import numpy as np
+import time
 
 
 class _GetchUnix:
@@ -32,34 +34,51 @@ A = Agent(stimArr)
 oldIndex = (0, 0)
 x, y = (0, 0)
 while(True):
+    TitlePrint('BitStrings')
+    print(A.KB.PBank.PC.bstrings)
     TitlePrint('Probabilities')
-    T = '====== {0} ======'
-    fmt = '{12:<30}{13:<30}{14}\n{0:<30}{4:<30}{8}\n{1:<30}{5:<30}{9}\n{2:<30}{6:<30}{10}\n{3:<30}{7:<30}{11}\n'
-    print(fmt.format(str(A.KB.PBank.Probs[0]),
-                     str(A.KB.PBank.Probs[1]),
-                     str(A.KB.PBank.Probs[2]),
-                     str(A.KB.PBank.Probs[3]),
-                     str(A.KB.WBank.Probs[0]),
-                     str(A.KB.WBank.Probs[1]),
-                     str(A.KB.WBank.Probs[2]),
-                     str(A.KB.WBank.Probs[3]),
-                     str(np.array(A.KB.WBank.Probs[0]) + np.array(A.KB.PBank.Probs[0])),
-                     str(np.array(A.KB.WBank.Probs[1]) + np.array(A.KB.PBank.Probs[1])),
-                     str(np.array(A.KB.WBank.Probs[2]) + np.array(A.KB.PBank.Probs[2])),
-                     str(np.array(A.KB.WBank.Probs[3]) + np.array(A.KB.PBank.Probs[3])),
-                     T.format('Pit'),
-                     T.format('Wumpus'),
-                     T.format('Death')))
 
-    # TitlePrint('BitStrings')
-    # print('-----------RED---------------')
-    # print(A.KB.PBank.Red.IMap.items())
-    # for O in A.KB.PBank.Red.outcomes:
-    #     print(O.bitstr, ' = ', O.prob)
-    # print('-----------BLUE---------------')
-    # print(A.KB.PBank.Blue.IMap.items())
-    # for O in A.KB.PBank.Blue.outcomes:
-    #     print(O.bitstr, ' = ', O.prob)
+    T = '====== {0} ======'
+    # fmt = """
+# {12:<30}{13:<30}{14}
+# {0:<30}{4:<30}{8}
+# {1:<30}{5:<30}{9}
+# {2:<30}{6:<30}{10}
+# {3:<30}{7:<30}{11}
+# """
+
+    fmt = """\
+{3}\n{0}\n
+{4}\n{1}\n
+{5}\n{2}\n\n
+"""
+
+    PPs = [row[:] for row in A.KB.PBank.Probs]
+    WPs = [row[:] for row in A.KB.WBank.Probs]
+
+    DPs = []
+    for i in range(len(PPs)):
+        DPs.append([])
+        for j in range(len(PPs[0])):
+            DPs[i].append(round(PPs[i][j] + WPs[i][j], 3))
+
+    for XXs in [PPs, WPs, DPs]:
+        Indexes = [index for index in A.KB.visited | A.KB.options]
+        for i, row in enumerate(XXs):
+            for j, _ in enumerate(row):
+                if (i, j) not in Indexes:
+                    XXs[i][j] = '-'
+            XXs[i] = str(XXs[i])
+
+    # print(fmt.format(str('\n'.join(PPs)),
+    #                  str('\n'.join(WPs)),
+    #                  str('\n'.join(DPs)),
+    #                  T.format('Pit'),
+    #                  T.format('Wumpus'),
+    #                  T.format('Death')))
+
+    print(T.format('Death'))
+    print('\n'.join(DPs), end='\n\n')
 
     TitlePrint('Environment')
     printEnv(Env)
@@ -67,7 +86,11 @@ while(True):
     print('Position of Agent: ({0},{1})'.format(x, y), end='\n')
 
     getch = _GetchUnix()
-    userInput = getch()
+    if A.dead or A.forfeit or A.foundG:
+        userInput = 'N'
+    else:
+        userInput = 'r'
+        time.sleep(0.5)
     os.system('clear')
 
     """ Instructions
@@ -83,7 +106,8 @@ while(True):
     oldIndex = (x, y)
 
     if userInput in 'hjklr':
-        Env[oldIndex] = bcolors.GREEN + 'X' + bcolors.ENDC
+        x, y = oldIndex
+        Env[x][y] = bcolors.GREEN + 'X' + bcolors.ENDC
 
         if userInput == 'j':
             A.down()

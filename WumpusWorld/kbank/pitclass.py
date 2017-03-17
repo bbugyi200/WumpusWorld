@@ -10,25 +10,44 @@ class Outcome:
 
 
 class PitClass:
-    def __init__(self, partition):
-        # self.pchances = pchances
-        self.partition = partition
-        self.initBStrings()
-
-    def initBStrings(self):
+    def __init__(self, start):
+        self.Indexes = []
         self.IMap = dict()
         self.RevIMap = dict()
-        for i, index in enumerate(self.partition):
-            self.IMap[i] = index
-            self.RevIMap[index] = i
+        self.count = 0
 
-        N = len(self.partition)
-        self.bstrings = [''.join(seq) for seq in itertools.product("01", repeat=N)]
+        self.initBStrings(start)
+        self.getOutcomes()
 
+    def initBStrings(self, start):
+        self.bstrings = ['1', '0']
+
+        self.IMap[self.count] = start
+        self.RevIMap[start] = self.count
+
+        self.Indexes.append(start)
+        self.count += 1
+
+    def getOutcomes(self):
         self.outcomes = []
         for bitstr in self.bstrings:
             prob = self.getBSProb(bitstr)
             self.outcomes.append(Outcome(bitstr, prob))
+
+    def addIndex(self, index):
+        if index in self.Indexes:
+            return
+
+        self.IMap[self.count] = index
+        self.RevIMap[index] = self.count
+
+        self.zeros = [bs + '0' for bs in self.bstrings]
+        self.ones = [bs + '1' for bs in self.bstrings]
+        self.bstrings = self.zeros + self.ones
+
+        self.getOutcomes()
+        self.Indexes.append(index)
+        self.count += 1
 
     def getProb(self, index):
         bsIndex = self.RevIMap[index]
@@ -39,6 +58,8 @@ class PitClass:
         return totalProb
 
     def notAll(self, indexes, X='empty'):
+        if not indexes:
+            return
         bsIndexes = []
         badStrings = []
         for index in indexes:
@@ -57,18 +78,19 @@ class PitClass:
             if match:
                 badStrings.append(outcome.bitstr)
 
-        self.outcomes = [O for O in self.outcomes if O.bitstr not in badStrings]
+        self.bstrings = [bs for bs in self.bstrings if bs not in badStrings]
+        self.getOutcomes()
 
     def noChanceOfPit(self, index):
         bsIndex = self.RevIMap[index]
-        self.outcomes = [O for O in self.outcomes if not int(O.bitstr[bsIndex])]
+        self.bstrings = [bs for bs in self.bstrings if not int(bs[bsIndex])]
+        self.getOutcomes()
 
     def getBSProb(self, bitstr):
         prob = 1.0
         for i, ch in enumerate(bitstr):
             x, y = self.IMap[i]
             chance = 0.2
-            # chance = self.pchances[x][y]
             if ch == '0':
                 chance = 1 - chance
             prob *= chance

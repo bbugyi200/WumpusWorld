@@ -23,10 +23,7 @@ class BaseBank:
     KnownWumpus = [False]
     ProbTable = dict()
     for Obj in ['P', 'W', 'G']:
-        ProbTable[Obj] = [[0., 0., 0., 0.],
-                          [0., 0., 0., 0.],
-                          [0., 0., 0., 0.],
-                          [0., 0., 0., 0.]]
+        ProbTable[Obj] = C.getMatrix(0.0)
 
     def __init__(self, stimArr):
         self.stimArr = stimArr
@@ -56,10 +53,8 @@ class BaseBank:
 class Uniform(BaseBank):
     def __init__(self, stimArr):
         BaseBank.__init__(self, stimArr)
-        self.Kbase = [[list(), list(), list(), list()],
-                      [list(), list(), list(), list()],
-                      [list(), list(), list(), list()],
-                      [list(), list(), list(), list()]]
+        self.Kbase = C.getMatrix(list())
+        self.numOfSquares = self.NOS = pow(C.EnvSize, 2)
 
         self.listOfPercepts = []
 
@@ -75,12 +70,12 @@ class Uniform(BaseBank):
         self.Kbase[x][y] = [[0]]
 
     def uniformDistribution(self):
-        self.listOfPercepts.append([16])
+        self.listOfPercepts.append([self.NOS])
         PerceptIndex = len(self.listOfPercepts) - 1
         for index in self.Indexes:
             x, y = index
             self.Kbase[x][y].append(self.listOfPercepts[PerceptIndex])
-            self.Probs[x][y] = round(1 / 15, 3)
+            self.Probs[x][y] = round(1 / self.NOS - 1, 3)
 
     def calcProbs(self):
         """ Uses percepts to calculate the pitProb of each square """
@@ -253,12 +248,12 @@ class PBankFull(BaseBank):
         self.Probs = self.ProbTable['P']
         BaseBank.__init__(self, stimArr)
 
-        self.PC = PitClass(self.Indexes)
+        self.PC = PitClass((0, 0))
 
         self.update((0, 0))
 
     def calcProbs(self):
-        for index in self.Indexes:
+        for index in self.PC.Indexes:
             x, y = index
 
             prob = round(self.PC.getProb(index), 3)
@@ -270,6 +265,9 @@ class PBankFull(BaseBank):
         senses = self.stimArr[x][y]
         directions = self.getDirections(index, clean=False)
 
+        for D in directions:
+            self.PC.addIndex(D)
+
         self.PC.noChanceOfPit(index)
         if C.Wind in senses:
             self.PC.notAll(directions)
@@ -278,14 +276,14 @@ class PBankFull(BaseBank):
                 self.PC.noChanceOfPit(D)
 
         PossibleWumpus = []
-        PossibleGold = []
-        for index in self.Indexes:
+        # PossibleGold = []
+        for index in self.PC.Indexes:
             x, y = index
             if self.ProbTable['W'][x][y]: PossibleWumpus.append(index)
-            if self.ProbTable['G'][x][y]: PossibleGold.append(index)
+            # if self.ProbTable['G'][x][y]: PossibleGold.append(index)
 
         self.PC.notAll(PossibleWumpus, X='full')
-        self.PC.notAll(PossibleGold, X='full')
+        # self.PC.notAll(PossibleGold, X='full')
 
         self.PC.updateProbs()
 
