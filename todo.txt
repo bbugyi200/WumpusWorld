@@ -12,8 +12,9 @@
 [X] Use parseoptions Python Library for start.py
 [X] Fix/Remove Death Class
 [X] Reduce pitclass bitstrings to only calculate V squares and ~V squares adjacent to V squares
+[X] Setup live demo (timed and automatic)
 [] Analyze Forfeit, Win, and Lose ratios (using fair map)
-[] Setup live demo (timed and automatic)
+[] Give Agent an Arrow
 
 ===== Low Priority =====
 [] Implement cost KB and cost-based utility function
