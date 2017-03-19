@@ -1,12 +1,9 @@
 from .. environment import getEnv
 from . pretty import TitlePrint, printEnv, makePretty, bcolors
 from .. stimuli import Stimuli
-from .. kbank.kbank import KBank
 from .. agent import Agent
 from . sims import getTestEnv
 import os
-import sys
-import numpy as np
 import time
 
 
