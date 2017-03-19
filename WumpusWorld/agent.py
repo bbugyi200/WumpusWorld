@@ -1,5 +1,6 @@
 from . kbank.kbank import KBank
-from . constants import getDirections, getPath, getGraph
+from . constants import getDirections
+from . graphs import getPath, getGraph
 from . import constants as C
 import time
 import os
