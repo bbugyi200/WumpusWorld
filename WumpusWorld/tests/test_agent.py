@@ -83,11 +83,16 @@ while(True):
     print('Position of Agent: ({0},{1})'.format(x, y), end='\n')
 
     getch = _GetchUnix()
-    if A.dead or A.forfeit or A.foundG:
-        userInput = 'N'
+    auto = False
+
+    if auto:
+        if A.dead or A.forfeit or A.foundG:
+            userInput = 'N'
+        else:
+            userInput = 'r'
+            time.sleep(0.5)
     else:
-        userInput = 'r'
-        time.sleep(0.5)
+        userInput = getch()
     os.system('clear')
 
     """ Instructions

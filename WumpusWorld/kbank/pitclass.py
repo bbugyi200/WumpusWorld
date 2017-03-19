@@ -1,7 +1,5 @@
 """ pitclass.py """
 
-import itertools
-
 
 class Outcome:
     def __init__(self, bitstr, prob):
@@ -60,17 +58,17 @@ class PitClass:
     def notAll(self, indexes, X='empty'):
         if not indexes:
             return
+
+        if X == 'empty':
+            Neg = 0
+        elif X == 'full':
+            Neg = 1
+
         bsIndexes = []
         badStrings = []
         for index in indexes:
             bsIndexes.append(self.RevIMap[index])
         for outcome in self.outcomes:
-
-            if X == 'empty':
-                Neg = 0
-            elif X == 'full':
-                Neg = 1
-
             match = True
             for index in bsIndexes:
                 if abs(int(outcome.bitstr[index]) - Neg):
@@ -107,7 +105,7 @@ class PitClass:
         for outcome in self.outcomes:
             sumOfProbs += outcome.prob
 
-        if sumOfProbs != 0:
+        if sumOfProbs:
             prob_factor = 1 / sumOfProbs
             for outcome in self.outcomes:
                 outcome.prob *= prob_factor
