@@ -15,6 +15,7 @@
 [X] Setup live demo (timed and automatic)
 [] Analyze Forfeit, Win, and Lose ratios (using fair map)
 [] Give Agent an Arrow
+[] Use point system to have Agent decide on appropriate max risk
 
 ===== Low Priority =====
 [] Implement cost KB and cost-based utility function
