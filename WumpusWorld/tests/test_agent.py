@@ -1,7 +1,16 @@
+"""  test_agent.py
+
+~~~ Input Options ~~~
+1. hjkl commands to move
+2. Enter N to get a new random (non-modified) environment.
+3. Enter M to get a new modified environment.
+"""
+
 from .. environment import getEnv
 from . pretty import TitlePrint, printEnv, makePretty, bcolors
 from .. stimuli import Stimuli
 from .. agent import Agent
+from .. import constants as C
 from . sims import getTestEnv
 import os
 import time
@@ -30,25 +39,19 @@ A = Agent(stimArr)
 
 oldIndex = (0, 0)
 x, y = (0, 0)
-while(True):
-    TitlePrint('BitStrings')
-    print(A.KB.PBank.PC.bstrings)
-    TitlePrint('Probabilities')
 
-    T = '====== {0} ======'
-    # fmt = """
-# {12:<30}{13:<30}{14}
-# {0:<30}{4:<30}{8}
-# {1:<30}{5:<30}{9}
-# {2:<30}{6:<30}{10}
-# {3:<30}{7:<30}{11}
-# """
+T = '====== {0} ======'
 
-    fmt = """\
+fmt = """\
 {3}\n{0}\n
 {4}\n{1}\n
 {5}\n{2}\n\n
 """
+
+while(True):
+    TitlePrint('BitStrings')
+    print(A.KB.PBank.PC.bstrings)
+    TitlePrint('Probabilities')
 
     PPs = [row[:] for row in A.KB.PBank.Probs]
     WPs = [row[:] for row in A.KB.WBank.Probs]
@@ -67,13 +70,6 @@ while(True):
                     XXs[i][j] = '-'
             XXs[i] = str(XXs[i])
 
-    # print(fmt.format(str('\n'.join(PPs)),
-    #                  str('\n'.join(WPs)),
-    #                  str('\n'.join(DPs)),
-    #                  T.format('Pit'),
-    #                  T.format('Wumpus'),
-    #                  T.format('Death')))
-
     print(T.format('Death'))
     print('\n'.join(DPs), end='\n\n')
 
@@ -83,27 +79,35 @@ while(True):
     print('Position of Agent: ({0},{1})'.format(x, y), end='\n')
 
     getch = _GetchUnix()
-    auto = False
+    auto = True
 
     if auto:
+        deathSen = "\nTHE AGENT HAS ENTERED A ROOM WITH A {0}!!! SHE IS DEAD!!!"
+        goldSen = "\nTHE AGENT HAS FOUND THE GOLD IN {0} MOVES!!!"
+        sentences = {C.Gold: goldSen.format(A.mCount),
+                     C.Pit: deathSen.format("PIT")}
+
         if A.dead or A.forfeit or A.foundG:
+            os.system('clear')
             userInput = 'N'
         else:
             userInput = 'r'
             time.sleep(0.5)
+
+        if A.foundG:
+            print(sentences[C.Gold])
+            time.sleep(2)
+        elif A.dead:
+            print(sentences[C.Pit])
+            time.sleep(2)
+        elif A.forfeit:
+            print("THE AGENT HAS FORFEITED THE GAME!!!")
+            time.sleep(1)
+
     else:
         userInput = getch()
+
     os.system('clear')
-
-    """ Instructions
-
-     print('~~~ Input Options ~~~',
-           '1. hjkl commands to move',
-           '2. Enter N to get a new random (non-modified) environment.',
-           '3. Enter M to get a new modified environment.',
-           sep='\n',
-           end='\n\n')
-    """
 
     oldIndex = (x, y)
 

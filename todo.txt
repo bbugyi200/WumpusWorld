@@ -13,7 +13,7 @@
 [X] Fix/Remove Death Class
 [X] Reduce pitclass bitstrings to only calculate V squares and ~V squares adjacent to V squares
 [X] Setup live demo (timed and automatic)
-[] Analyze Forfeit, Win, and Lose ratios (using fair map)
+[X] Analyze Forfeit, Win, and Lose ratios (using fair map)
 [] Give Agent an Arrow
 [] Use point system to have Agent decide on appropriate max risk
 

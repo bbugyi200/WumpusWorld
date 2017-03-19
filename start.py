@@ -22,4 +22,4 @@ if funcStr:
         key, value = args[i].split('=')
         argsList.update({key: value})
 
-    Func(**argsList)
+    F = Func(**argsList)

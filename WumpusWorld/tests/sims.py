@@ -1,6 +1,10 @@
 import random
 import numpy as np
+from collections import defaultdict
 from ..environment import getEnv
+from . pretty import makePretty
+from .. stimuli import Stimuli
+from .. agent import Agent
 from .. import constants as C
 
 
@@ -100,3 +104,56 @@ def PPSim(num, tests=100000, GP=0.2, IncludeGold=False):
             numOfSuccesses += 1
 
     print('{0}%'.format(numOfSuccesses / total * 100))
+
+
+class WinLoseForfeitRatio:
+    def __init__(self, loops=5000, log=True):
+        self.log = log
+        self.counts = defaultdict(lambda: 0)
+        self.logFiles = defaultdict(lambda: False)
+
+        while self.counts['loop'] < loops:
+            self.env = getEnv()
+            self.stimArr = Stimuli(self.env).stimArr
+            self.A = Agent(self.stimArr, verbose=False)
+
+            self.counts['loop'] += 1
+            while True:
+                self.A.act()
+
+                if self.A.forfeit:
+                    self.counts['forfeit'] += 1
+                    if not self.env[0][1] and not self.env[1][0]:
+                        self.counts['fair_forfeit'] += 1
+                    self.logEnv('forfeitEnvs')
+                    break
+                elif self.A.dead:
+                    self.counts['death'] += 1
+                    self.logEnv('deathEnvs')
+                    break
+                elif self.A.foundG:
+                    self.counts['gold'] += 1
+                    break
+
+        with open('logs/WLF_Ratios.log', 'w') as F:
+            F.writelines(['Gold = {0}'.format(self.counts['gold']),
+                          'Forfeit = {0}'.format(self.counts['forfeit']),
+                          'Fair Forfeit = {0}'.format(self.counts['fair_forfeit']),
+                          'Death = {0}'.format(self.counts['death'])])
+
+    def logEnv(self, logfile):
+        if not self.log:
+            return
+
+        filename = 'logs/' + logfile + '.log'
+        if not self.logFiles[filename]:
+            self.clearLog(filename)
+
+        self.logFiles[filename] = True
+
+        with open(filename, 'a') as F:
+            F.write(str(self.env) + '\n\n')
+
+    def clearLog(self, filename):
+        with open(filename, 'w') as F:
+            F.write('------------- {0} --------------\n'.format(filename))

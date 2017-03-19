@@ -7,8 +7,9 @@ import os
 
 
 class Agent:
-    def __init__(self, stimArr):
+    def __init__(self, stimArr, verbose=True):
         self.stimArr = stimArr
+        self.verbose = verbose
         self.mCount = 0
         self.KB = KBank(stimArr)
         self.actions = {'left': self.left,
@@ -32,7 +33,7 @@ class Agent:
 
         for action in self.getActionSequence(path, []):
             self.mCount += 1
-            print('action  = ', action)
+            if self.verbose: print('action  = ', action)
             self.Log.append(action)
             action()
 
@@ -40,29 +41,14 @@ class Agent:
 
     def react(self):
         """ React to Gold, Pit, or Wumpus """
-
-        deathSen = "\nTHE AGENT HAS ENTERED A ROOM WITH A {0}!!! SHE IS DEAD!!!"
-        goldSen = "\nTHE AGENT HAS FOUND THE GOLD IN {0} MOVES!!!"
-        sentences = {C.Gold: goldSen.format(self.mCount),
-                     C.Pit: deathSen.format("PIT"),
-                     C.Wumpus: deathSen.format("WUMPUS")}
-
         x, y = self.KB.location
         senses = self.stimArr[x][y]
+
         if C.Gold in senses:
-            os.system('clear')
-            print(sentences[C.Gold])
-            time.sleep(2)
             self.foundG = True
         elif C.Wumpus in senses:
-            os.system('clear')
-            print(sentences[C.Wumpus])
-            time.sleep(2)
             self.dead = True
         elif C.Pit in senses:
-            os.system('clear')
-            print(sentences[C.Pit])
-            time.sleep(2)
             self.dead = True
 
     def maxUtility(self, options):
@@ -79,9 +65,6 @@ class Agent:
                 if prob == Min:
                     options.append(index)
         else:
-            os.system('clear')
-            print("THE AGENT HAS FORFEITED THE GAME!")
-            time.sleep(1)
             options = [(0, 0)]
             self.forfeit = True
 
