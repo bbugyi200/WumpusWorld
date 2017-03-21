@@ -181,20 +181,17 @@ class PBankFull(BaseBank):
 
         self.PC.noChanceOfPit(index)
         if C.Wind in senses:
-            self.PC.notAll(directions)
+            self.PC.notAll(directions, 0)
         else:
             for D in directions:
                 self.PC.noChanceOfPit(D)
 
         PossibleWumpus = []
-        # PossibleGold = []
         for index in self.PC.Indexes:
             x, y = index
             if self.ProbTable['W'][x][y]: PossibleWumpus.append(index)
-            # if self.ProbTable['G'][x][y]: PossibleGold.append(index)
 
-        self.PC.notAll(PossibleWumpus, X='full')
-        # self.PC.notAll(PossibleGold, X='full')
+        self.PC.notAll(PossibleWumpus, 1)
 
         self.PC.updateProbs()
 

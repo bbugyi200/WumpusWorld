@@ -55,14 +55,14 @@ class PitClass:
                 totalProb += outcome.prob
         return totalProb
 
-    def notAll(self, indexes, X='empty'):
+    def notAll(self, indexes, X):
         if not indexes:
             return
 
-        if X == 'empty':
-            Neg = 0
-        elif X == 'full':
+        if X:
             Neg = 1
+        else:
+            Neg = 0
 
         bsIndexes = []
         badStrings = []
