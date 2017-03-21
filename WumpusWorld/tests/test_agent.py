@@ -89,7 +89,7 @@ while(True):
 
         if A.dead or A.forfeit or A.foundG:
             os.system('clear')
-            userInput = 'N'
+            userInput = 'F'
         else:
             userInput = 'r'
             time.sleep(0.5)
