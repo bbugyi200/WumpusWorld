@@ -49,8 +49,6 @@ fmt = """\
 """
 
 while(True):
-    TitlePrint('BitStrings')
-    print(A.KB.PBank.PC.bstrings)
     TitlePrint('Probabilities')
 
     PPs = [row[:] for row in A.KB.PBank.Probs]

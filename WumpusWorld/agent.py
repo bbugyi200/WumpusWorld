@@ -2,12 +2,10 @@ from . kbank.kbank import KBank
 from . constants import getDirections
 from . graphs import getPath, getGraph
 from . import constants as C
-import time
-import os
 
 
 class Agent:
-    def __init__(self, stimArr, verbose=True):
+    def __init__(self, stimArr, verbose=False):
         self.stimArr = stimArr
         self.verbose = verbose
         self.mCount = 0
@@ -27,9 +25,9 @@ class Agent:
         senses = self.stimArr[x][y]
 
         if C.Gold in senses:
-            path = self.maxUtility([(0, 0)])
+            path = self.UtilityFunc([(0, 0)])
         else:
-            path = self.maxUtility(options)
+            path = self.UtilityFunc(options)
 
         for action in self.getActionSequence(path, []):
             self.mCount += 1
@@ -51,34 +49,34 @@ class Agent:
         elif C.Pit in senses:
             self.dead = True
 
-    def maxUtility(self, options):
+    def UtilityFunc(self, options):
         DeathProbs = dict()
         for option in options:
             x, y = option
             DProb = self.KB.PBank.Probs[x][y] + self.KB.WBank.Probs[x][y]
             DeathProbs[option] = DProb
 
-        Min = min(DeathProbs.values())
-        options = []
-        if Min < 0.5:
+        minDeathProb = min(DeathProbs.values())
+        filtered_options = []
+        if minDeathProb < 0.5:
             for index, prob in DeathProbs.items():
-                if prob == Min:
-                    options.append(index)
+                if prob == minDeathProb:
+                    filtered_options.append(index)
         else:
-            options = [(0, 0)]
+            filtered_options = [(0, 0)]
             self.forfeit = True
 
         path = ...
-        Min = 100
-        for index in options:
+        minDistance = 100
+        for index in filtered_options:
             graph = getGraph(self.KB.visited | {index})
-            P = getPath(graph, self.KB.location, index)
-            D = len(P)
-            if D < Min:
-                Min = D
-                path = P
+            path = getPath(graph, self.KB.location, index)
+            distance = len(path)
+            if distance < minDistance:
+                minDistance = distance
+                final_path = path
 
-        return path
+        return final_path
 
     def getActionSequence(self, path, ActionSeq):
         if len(path) < 2:

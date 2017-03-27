@@ -12,7 +12,7 @@ Gold = 4
 Wind = 5
 Stench = 6
 
-EnvSize = 5
+EnvSize = 4
 
 
 def getMatrix(item):

@@ -1,14 +1,21 @@
----------------------------------------------------
-![This project is a work in progress](img/under-construction.jpg)
-
----------------------------------------------------
-
 # What is this project about?
-An attempt to design an agent that can logically navigate the Wumpus World environment described by Stuart Russell and Peter Norvig in their conjointly authored text, *Artificial Intelligence: A Modern Approach*.
+This project is an attempt to design an agent that can logically navigate the Wumpus World environment described by Stuart Russell and Peter Norvig in their conjointly authored text, *Artificial Intelligence: A Modern Approach*.
+
+# Screencast Demonstration
+
+![img](img/screencast.gif)
+
+The demonstration above was run using the following command:
+```
+python start.py -m tests.test_agent.py
+```
+
+# What is a Wumpus World?
 
 A description of a Wumpus World, taken from Russell and Norvig's text more or less verbatim, is given below. I have used ***emphasis*** to mark important points on how my implementation may vary from the official description.
 
-# What is a Wumpus World?
+
+![Wumpus World Illustration](img/WumpusWorld.png)
 
 ### Informal Description
 * A Wumpus World is a cave consisting of rooms connected by passageways.
@@ -49,7 +56,6 @@ The agent has five sensors, each of which gives a single bit of information (eac
 * *Bump* - True on the action following one where the agent bumps into a wall
 * *Scream* - True on the action following one where the wumpus is shot by an arrow
 
+# GSUMC
 
-### Illustration of a Typical Wumpus World
-
-![Wumpus World Illustration](img/WumpusWorld.png)
+I presented a poster on this project at the 2017 Garden State Undergraduate Mathematics Conference ([GSUMC](http://sections.maa.org/newjersey/GSUMC/GSUMC.htm)). This poster is included as a PDF file in this repository and can be found [here](ConferencePoster.pdf).
