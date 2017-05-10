@@ -13,15 +13,12 @@ in their text, "Artificial Intelligence: A Modern Apprach":
       of being a pit
 """
 
-import numpy as np
 import random
 from . import constants as C
 from . constants import getIndexes
 
 
-# dtype=np.int sets the element type to integers
 env = C.getMatrix(0)
-# env = np.zeros((5, 5), dtype=np.int)
 
 
 Indexes = getIndexes()
@@ -71,7 +68,6 @@ def refreshGlobals():
     global env
     Indexes = getIndexes()
     env = C.getMatrix(0)
-    # env = np.zeros((5, 5), dtype=np.int)
 
 
 def getEnv(fair=False):

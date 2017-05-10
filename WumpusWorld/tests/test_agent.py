@@ -77,7 +77,7 @@ while(True):
     print('Position of Agent: ({0},{1})'.format(x, y), end='\n')
 
     getch = _GetchUnix()
-    auto = True
+    auto = False
 
     if auto:
         deathSen = "\nTHE AGENT HAS ENTERED A ROOM WITH A {0}!!! SHE IS DEAD!!!"
